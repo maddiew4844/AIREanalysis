@@ -12,7 +12,6 @@ Last updated: 07/07/23
 """
 
 import pandas as pd
-import numpy as np
 import os
 import matplotlib.pyplot as plt
 
@@ -25,6 +24,7 @@ import pandas
 import logging
 from colorama import init, Fore, Style
 from datetime import datetime, timedelta
+import numpy as np
 
 # Initialize colorama
 init()
@@ -61,7 +61,8 @@ def main():
     # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
     participant_data = {}
 
-    # Cycle through all the participants, filling the participant_data dictionary with nested info.
+    # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
+    # device ID, and airthings data.
     for part_id in part_id_list:
 
         date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
@@ -84,6 +85,10 @@ def main():
 
         # Fill participant_data dictionary with all the info from the participant.
         participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
+
+    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for all the participants.
+    participant_data = calculate_summary_stats(participant_data)
+
 
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
@@ -470,9 +475,60 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
 
     return participant_data
 
-def summary_statisitcs():
+def calculate_summary_stats(participant_data):
+    """ Calculates summary statistics for the "pm25" column in the "data" key of all the participants from
+    participant_data. Summary stats include: percentiles, max, mean, % above 12.
 
-    return
+    Args:
+        participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
+        group_assignment.
+
+    Returns:
+        participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
+        group_assignment. Now contains a nested summary statistics dictionary.
+
+    Raises:
+        KeyError: If the "data" key is not present in participant_data or if "pm25" column is not present in the DataFrame.
+    """
+
+    for part_id in participant_data.keys():
+        data = participant_data[part_id]["data"]
+        print(data)
+
+        # Check if "data" key exists and is a DataFrame
+        if not isinstance(data, pd.DataFrame):
+            raise KeyError("'data' key must contain a DataFrame.")
+
+        pm25_column = data["pm25"]
+
+        # Check if "pm25" column exists in the DataFrame
+        if "pm25" not in data.columns:
+            raise KeyError("'pm25' column not found in the DataFrame.")
+
+        # Calculate summary statistics
+        tenth_percentile = np.percentile(pm25_column, 10)
+        twentyfifth_percentile = np.percentile(pm25_column, 25)
+        fiftieth_percentile = np.percentile(pm25_column, 50)
+        seventyfifth_percentile = np.percentile(pm25_column, 75)
+        ninetieth_percentile = np.percentile(pm25_column, 90)
+        maximum = np.max(pm25_column)
+        mean = np.mean(pm25_column)
+        percentage_above_12 = (np.sum(pm25_column > 12) / len(pm25_column)) * 100
+
+        # Create a dictionary with the summary statistics
+        summary_statistics = {
+            "10th_percentile": tenth_percentile,
+            "25th_percentile": twentyfifth_percentile,
+            "50th_percentile": fiftieth_percentile,
+            "75th_percentile": seventyfifth_percentile,
+            "90th_percentile": ninetieth_percentile,
+            "max": maximum,
+            "mean": mean,
+            "percentage_above_12": percentage_above_12
+        }
+
+    return participant_data
+
 
 if __name__ == "__main__":
     main()
