@@ -89,9 +89,10 @@ def main():
     # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for all the participants. Add them to
     # particpant_data
     participant_data = calculate_summary_stats(participant_data)
-    print(participant_data)
 
+    # Create graphs of the summary data.
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
+
 
     return
 
