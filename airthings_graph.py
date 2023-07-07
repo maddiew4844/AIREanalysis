@@ -86,9 +86,10 @@ def main():
         # Fill participant_data dictionary with all the info from the participant.
         participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
 
-    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for all the participants.
+    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for all the participants. Add them to
+    # particpant_data
     participant_data = calculate_summary_stats(participant_data)
-
+    print(participant_data)
 
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
@@ -493,17 +494,21 @@ def calculate_summary_stats(participant_data):
 
     for part_id in participant_data.keys():
         data = participant_data[part_id]["data"]
-        print(data)
 
         # Check if "data" key exists and is a DataFrame
         if not isinstance(data, pd.DataFrame):
             raise KeyError("'data' key must contain a DataFrame.")
 
-        pm25_column = data["pm25"]
-
         # Check if "pm25" column exists in the DataFrame
         if "pm25" not in data.columns:
             raise KeyError("'pm25' column not found in the DataFrame.")
+        else:
+            pm25_column = data["pm25"]
+
+        # Calculate the percentage above 12 before turning pm25 into a list.
+        percentage_above_12 = (np.sum(pm25_column > 12) / len(pm25_column)) * 100
+
+        pm25_column = data["pm25"].dropna().tolist()
 
         # Calculate summary statistics
         tenth_percentile = np.percentile(pm25_column, 10)
@@ -513,7 +518,6 @@ def calculate_summary_stats(participant_data):
         ninetieth_percentile = np.percentile(pm25_column, 90)
         maximum = np.max(pm25_column)
         mean = np.mean(pm25_column)
-        percentage_above_12 = (np.sum(pm25_column > 12) / len(pm25_column)) * 100
 
         # Create a dictionary with the summary statistics
         summary_statistics = {
@@ -526,6 +530,9 @@ def calculate_summary_stats(participant_data):
             "mean": mean,
             "percentage_above_12": percentage_above_12
         }
+
+        # Add the summary stats dictionary to participant_data.
+        participant_data[part_id]['summary_stats'] = summary_statistics
 
     return participant_data
 
