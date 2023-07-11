@@ -25,6 +25,7 @@ import logging
 from colorama import init, Fore, Style
 from datetime import datetime, timedelta
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Initialize colorama
 init()
@@ -86,12 +87,124 @@ def main():
         # Fill participant_data dictionary with all the info from the participant.
         participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
 
-    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for all the participants. Add them to
-    # particpant_data
-    participant_data = calculate_summary_stats(participant_data)
+    # # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
+    # # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
+    # # 'summary_stats'.
+    # participant_data = prep_summary_stats(participant_data)
+    # print(participant_data)
 
+    # participant_data = {
+    #     'A001': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 23, 14, 45),
+    #             '2': datetime(2023, 4, 7, 10, 10),
+    #             '3': datetime(2023, 4, 24, 16, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 10),
+    #             '2B': datetime(2023, 4, 7, 10, 11),
+    #             '3B': datetime(2023, 4, 24, 16, 1)
+    #         },
+    #         'GroupNO': 'A',
+    #         'airthings_id': 'A01',
+    #         'data': {
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+    #                  '2023-03-23 23:00:00']),
+    #             'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
+    #             'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
+    #             'light': [23, 29, 22, 16, 13],
+    #             'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
+    #             'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
+    #             'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
+    #             'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
+    #             'pm25': [10, 15, 8, 5, 22]
+    #         },
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 237.0,
+    #             'mean': 12.118873826903023,
+    #             'percentage_above_12': 32.604166666666664
+    #         }
+    #     },
+    #     'A002': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 27, 15, 0),
+    #             '2': datetime(2023, 4, 14, 14, 0),
+    #             '3': datetime(2023, 4, 28, 9, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 11),
+    #             '2B': datetime(2023, 4, 14, 14, 1),
+    #             '3B': datetime(2023, 4, 28, 9, 1)
+    #         },
+    #         'GroupNO': 'A',
+    #         'airthings_id': 'A02',
+    #         'data': {
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+    #                 '2023-03-24 19:00:00']),
+    #             'co2': [802.0, 789.0, 772.0, 942.0, 965.0],
+    #             'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
+    #             'light': [39, 35, 28, 14, 31],
+    #             'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
+    #             'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
+    #             'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
+    #             'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
+    #             'pm25': [12, 9, 18, 6, 20]
+    #         },
+    #         'summary_stats': {
+    #             '10th_percentile': 3.0,
+    #             '25th_percentile': 4.0,
+    #             '50th_percentile': 7.0,
+    #             '75th_percentile': 15.0,
+    #             '90th_percentile': 25.0,
+    #             'max': 189.0,
+    #             'mean': 11.128205128205128,
+    #             'percentage_above_12': 24.63768115942029
+    #         }
+    #     },
+    #     'A003': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 28, 13, 0),
+    #             '2': datetime(2023, 4, 10, 12, 0),
+    #             '3': datetime(2023, 4, 28, 14, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 12),
+    #             '2B': datetime(2023, 4, 10, 12, 1),
+    #             '3B': datetime(2023, 4, 28, 14, 1)
+    #         },
+    #         'GroupNO': 'B',
+    #         'airthings_id': 'A03',
+    #         'data': {
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+    #                  '2023-03-28 21:00:00']),
+    #             'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+    #             'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #             'light': [42, 41, 44, 36, 35],
+    #             'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #             'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #             'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #             'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #             'pm25': [5, 7, 6, 3, 9]
+    #         },
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 237.0,
+    #             'mean': 12.118873826903023,
+    #             'percentage_above_12': 32.604166666666664
+    #         }
+    #     },
+    # }
+
+    educational_groups = group_lists(participant_data)
     # Create graphs of the summary data.
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
+    graph_group_timeseries(participant_data, educational_groups, graph_location)
 
 
     return
@@ -304,9 +417,9 @@ def convert_visit_date(date_dict, part_id):
     for key in ['2', '3']:
         date_dict["{}{}".format(key, "B")] = date_dict[key] + timedelta(minutes=1)
 
-    # to download all data through today (except for A009 and A004 who did not keep their monitors):
+    # to download all data through today (except for A004 who did not keep their monitor):
     #TODO: automate choice of downloading through current date or through visit 4 or through visit 5.
-    if part_id != "A009" or part_id != "A004":
+    if part_id != "A004":
         date_dict['4'] = datetime.today().replace(microsecond=0)
 
     return date_dict
@@ -477,9 +590,9 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
 
     return participant_data
 
-def calculate_summary_stats(participant_data):
-    """ Calculates summary statistics for the "pm25" column in the "data" key of all the participants from
-    participant_data. Summary stats include: percentiles, max, mean, % above 12.
+def prep_summary_stats(participant_data):
+    """ Preps for summary statistic (percentiles, max, mean, % above 12) calculations for PM2.5. Calculations for each
+    participant, all participants combined, and all participants of each group (A, B, C) combined.
 
     Args:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
@@ -488,10 +601,21 @@ def calculate_summary_stats(participant_data):
     Returns:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
         group_assignment. Now contains a nested summary statistics dictionary.
+        # data_groups (dict) : metadata for all participants combined, group A combined, group B combined, and group C
+        # combined.
 
     Raises:
-        KeyError: If the "data" key is not present in participant_data or if "pm25" column is not present in the DataFrame.
+        KeyError: If the "data" key is not present in participant_data or if "pm25" column is not present in the
+        DataFrame.
     """
+
+    # initialize a dict of lists to combine data from all participants, and from all participants of each group.
+    data_groups = {
+    'overall': [],
+    'group_a': [],
+    'group_b': [],
+    'group_c': []
+    }
 
     for part_id in participant_data.keys():
         data = participant_data[part_id]["data"]
@@ -505,38 +629,126 @@ def calculate_summary_stats(participant_data):
             raise KeyError("'pm25' column not found in the DataFrame.")
         else:
             pm25_column = data["pm25"]
+            pm25_column = data["pm25"].dropna().tolist()
 
-        # Calculate the percentage above 12 before turning pm25 into a list.
-        percentage_above_12 = (np.sum(pm25_column > 12) / len(pm25_column)) * 100
+        # Add the data to the overall data list and to its respective group list.
+        data_groups['overall'].extend(pm25_column)
+        group = participant_data[part_id]["GroupNO"]
 
-        pm25_column = data["pm25"].dropna().tolist()
+        if group == 'A':
+            data_groups['group_a'].extend(pm25_column)
+        elif group == 'B':
+            data_groups['group_b'].extend(pm25_column)
+        elif group == 'C':
+            data_groups['group_c'].extend(pm25_column)
 
-        # Calculate summary statistics
-        tenth_percentile = np.percentile(pm25_column, 10)
-        twentyfifth_percentile = np.percentile(pm25_column, 25)
-        fiftieth_percentile = np.percentile(pm25_column, 50)
-        seventyfifth_percentile = np.percentile(pm25_column, 75)
-        ninetieth_percentile = np.percentile(pm25_column, 90)
-        maximum = np.max(pm25_column)
-        mean = np.mean(pm25_column)
-
-        # Create a dictionary with the summary statistics
-        summary_statistics = {
-            "10th_percentile": tenth_percentile,
-            "25th_percentile": twentyfifth_percentile,
-            "50th_percentile": fiftieth_percentile,
-            "75th_percentile": seventyfifth_percentile,
-            "90th_percentile": ninetieth_percentile,
-            "max": maximum,
-            "mean": mean,
-            "percentage_above_12": percentage_above_12
-        }
-
-        # Add the summary stats dictionary to participant_data.
+        # Calculate summary stats for current individual participant. Add them to participant_data.
+        summary_statistics = calculate_summary_stats(pm25_column)
         participant_data[part_id]['summary_stats'] = summary_statistics
 
-    return participant_data
+    # Calculate summary stats for all participants combined and for each group combined.
+    for data_grouping, data_list in data_groups.items():
+        summary_statistics = calculate_summary_stats(data_list)
+        participant_data[data_grouping] = {}
+        participant_data[data_grouping]['summary_stats'] = summary_statistics
 
+    return participant_data#, data_groups
+
+def calculate_summary_stats(pm25_column):
+    """ Calculate the summary statistics for a given set of PM2.5 values and return them in a dictionary.
+    Args:
+        pm25_column (list) : list of pm2.5 values for an individual participant, all participants, or all participants
+        of one group.
+    Returns:
+        summary_statistics (dict) : all the summary statistics from the given PM2.5 values, arranged in dict.
+    """
+
+    # Create a dictionary with the calculated summary statistics
+    summary_statistics = {
+        "10th_percentile": np.percentile(pm25_column, 10),
+        "25th_percentile": np.percentile(pm25_column, 25),
+        "50th_percentile": np.percentile(pm25_column, 50),
+        "75th_percentile": np.percentile(pm25_column, 75),
+        "90th_percentile": np.percentile(pm25_column, 90),
+        "max": np.max(pm25_column),
+        "mean": np.mean(pm25_column),
+        "percentage_above_12": (sum(value > 12 for value in pm25_column) / len(pm25_column)) * 100
+    }
+
+    return summary_statistics
+
+def group_lists(participant_data):
+    """Creates 3 lists, one for each educational group, to sort all participant IDs into their respective groups.
+
+    Args:
+        participant_data (dict) : nested dictionary with participant IDs as keys as all data as values.
+
+    Returns:
+        educational_groups (dict) : dictionary containing 3 lists. Each list contains all participant IDs from that
+        educational group.
+    """
+
+    # Initializes dictionary to contain the IDs of all participants in each educational group.
+    educational_groups = {
+    'A' : [],
+    'B' : [],
+    'C' : []
+    }
+
+    for part_id in participant_data.keys():
+        group = participant_data[part_id]["GroupNO"]
+
+        # Records participant ID into one of the 3 educational group lists.
+        if group == 'A':
+            educational_groups['A'].append(part_id)
+        elif group == 'B':
+            educational_groups['B'].append(part_id)
+        elif group == 'C':
+            educational_groups['C'].append(part_id)
+
+    return educational_groups
+
+def graph_group_timeseries(participant_data, educational_groups, graph_location):
+    """Graphs PM2.5 timeseries data for all particpants of each educational group. Results in 3 graphs."""
+
+    # Define a list of colors, line styles, and markers to make lines unique.
+    colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown']
+    line_styles = ['-', '--', '-.', ':']
+    markers = ['.', 'o', 'v', '^', 's', 'd']
+
+    # Create one graph for each educational group
+    for ed_group in ['A', 'B', 'C']:
+        plt.figure(figsize=(8, 5), dpi=150)
+        plt.title(f'PM2.5 vs Time for AIRE Group {ed_group}', fontdict={'fontweight': 'bold', 'fontsize': 18})
+        plt.xlabel('Timestamp')
+        plt.ylabel('PM2.5')
+
+        # Go through all participants of the current educational group, plotting PM2.5 vs time.
+        participants = educational_groups[ed_group]
+        for i, part_id in enumerate(participants):
+            # Get the color, line style, and marker for the current participant
+            color = colors[i % len(colors)]
+            line_style = line_styles[i % len(line_styles)]
+            marker = markers[i % len(markers)]
+
+            # Plot PM2.5 vs time using the specified color, line style, and marker.
+            plt.plot(participant_data[part_id]['data']['time'], participant_data[part_id]['data']['pm25'], color=color,
+                     linestyle=line_style, marker=marker, linewidth=1, markersize=2, label=part_id)
+
+
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+        # # Save the plot to the specified directory
+        # file_name = f"group_{ed_group}_pm25_plot.png"
+        # file_path = os.path.join(graph_location, file_name)
+        # plt.savefig(file_path)
+        #
+        # # Close the plot to free up resources
+        # plt.close()
+
+    return
 
 if __name__ == "__main__":
     main()
