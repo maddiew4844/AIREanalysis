@@ -26,6 +26,7 @@ from colorama import init, Fore, Style
 from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Initialize colorama
 init()
@@ -87,10 +88,10 @@ def main():
         # Fill participant_data dictionary with all the info from the participant.
         participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
 
-    # # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
-    # # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
-    # # 'summary_stats'.
-    # participant_data = prep_summary_stats(participant_data)
+    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
+    # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
+    # 'summary_stats'.
+    participant_data = prep_summary_stats(participant_data)
     # print(participant_data)
 
     # participant_data = {
@@ -124,9 +125,9 @@ def main():
     #             '50th_percentile': 6.0,
     #             '75th_percentile': 16.0,
     #             '90th_percentile': 28.0,
-    #             'max': 237.0,
+    #             'max': 20.0,
     #             'mean': 12.118873826903023,
-    #             'percentage_above_12': 32.604166666666664
+    #             'percentage_above_12': 40
     #         }
     #     },
     #     'A002': {
@@ -159,9 +160,9 @@ def main():
     #             '50th_percentile': 7.0,
     #             '75th_percentile': 15.0,
     #             '90th_percentile': 25.0,
-    #             'max': 189.0,
-    #             'mean': 11.128205128205128,
-    #             'percentage_above_12': 24.63768115942029
+    #             'max': 100,
+    #             'mean': 30,
+    #             'percentage_above_12': 20
     #         }
     #     },
     #     'A003': {
@@ -194,18 +195,21 @@ def main():
     #             '50th_percentile': 6.0,
     #             '75th_percentile': 16.0,
     #             '90th_percentile': 28.0,
-    #             'max': 237.0,
-    #             'mean': 12.118873826903023,
-    #             'percentage_above_12': 32.604166666666664
+    #             'max': 150.0,
+    #             'mean': 4,
+    #             'percentage_above_12': 32
     #         }
     #     },
     # }
 
+    # Create 3 lists, containing all participant IDs for participants of each educational group.
     educational_groups = group_lists(participant_data)
-    # Create graphs of the summary data.
-    graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
-    graph_group_timeseries(participant_data, educational_groups, graph_location)
 
+    # Location to save graphs.
+    graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
+
+    # graph_group_timeseries(participant_data, educational_groups, graph_location)
+    plot_summaries(participant_data, graph_location)
 
     return
 
@@ -612,9 +616,9 @@ def prep_summary_stats(participant_data):
     # initialize a dict of lists to combine data from all participants, and from all participants of each group.
     data_groups = {
     'overall': [],
-    'group_a': [],
-    'group_b': [],
-    'group_c': []
+    'group_A': [],
+    'group_B': [],
+    'group_C': []
     }
 
     for part_id in participant_data.keys():
@@ -636,11 +640,11 @@ def prep_summary_stats(participant_data):
         group = participant_data[part_id]["GroupNO"]
 
         if group == 'A':
-            data_groups['group_a'].extend(pm25_column)
+            data_groups['group_A'].extend(pm25_column)
         elif group == 'B':
-            data_groups['group_b'].extend(pm25_column)
+            data_groups['group_B'].extend(pm25_column)
         elif group == 'C':
-            data_groups['group_c'].extend(pm25_column)
+            data_groups['group_C'].extend(pm25_column)
 
         # Calculate summary stats for current individual participant. Add them to participant_data.
         summary_statistics = calculate_summary_stats(pm25_column)
@@ -651,6 +655,11 @@ def prep_summary_stats(participant_data):
         summary_statistics = calculate_summary_stats(data_list)
         participant_data[data_grouping] = {}
         participant_data[data_grouping]['summary_stats'] = summary_statistics
+
+    # Add a "GroupNO" key for data_groups.
+    for key in data_groups.keys():
+        participant_data[key]["GroupNO"] = key[-1]
+
 
     return participant_data#, data_groups
 
@@ -709,10 +718,17 @@ def group_lists(participant_data):
     return educational_groups
 
 def graph_group_timeseries(participant_data, educational_groups, graph_location):
-    """Graphs PM2.5 timeseries data for all particpants of each educational group. Results in 3 graphs."""
+    """Graphs PM2.5 timeseries data for all particpants of each educational group. Results in 3 graphs.
+
+    Args:
+        participant_data (dict) : nested dictionary with participant IDs as keys as all data as values.
+        educational_groups (dict) : dictionary containing 3 lists. Each list contains all participant IDs from that
+        educational group.
+        graph_location (str) : pathway to where graphs are saved
+    """
 
     # Define a list of colors, line styles, and markers to make lines unique.
-    colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown']
+    colors = sns.color_palette('pastel')
     line_styles = ['-', '--', '-.', ':']
     markers = ['.', 'o', 'v', '^', 's', 'd']
 
@@ -735,23 +751,74 @@ def graph_group_timeseries(participant_data, educational_groups, graph_location)
             plt.plot(participant_data[part_id]['data']['time'], participant_data[part_id]['data']['pm25'], color=color,
                      linestyle=line_style, marker=marker, linewidth=1, markersize=2, label=part_id)
 
-
         plt.legend()
-        plt.tight_layout()
         plt.show()
 
         # # Save the plot to the specified directory
-        # file_name = f"group_{ed_group}_pm25_plot.png"
-        # file_path = os.path.join(graph_location, file_name)
-        # plt.savefig(file_path)
-        #
-        # # Close the plot to free up resources
-        # plt.close()
+        # save_graph(graph_location, f"group_{ed_group}_pm25_plot.png")
 
     return
 
+def save_graph(graph_location, file_name):
+    # Save the plot to the specified directory
+    file_path = os.path.join(graph_location, file_name)
+    plt.savefig(file_path)
+
+    # Close the plot to free up resources
+    plt.close()
+
+    return
+
+def plot_summaries(participant_data, graph_location):
+  """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
+  includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
+  by group assignment."""
+
+  participant_ids = list(participant_data.keys())
+
+  # Define the pastel color palette
+  colors = sns.color_palette('pastel')[1:5]
+
+  # Create a bar chart for each summary statistic.
+  for sum_stat in ['max', 'mean', 'percentage_above_12']:
+      plt.figure()
+      plt.figure(figsize=(8, 5), dpi=150)
+      plt.title(f'{sum_stat} vs participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
+      plt.xlabel('Participant')
+      plt.ylabel(sum_stat)
+
+      # Retrieve the summary statistic values for each participant
+      stat_values = [participant_data[part_id]['summary_stats'][sum_stat] for part_id in participant_ids]
+
+      # Assign colors based on 'GroupNO' value
+      bar_colors = [colors[0] if participant_data[part_id]["GroupNO"] == 'A' else
+                    colors[1] if participant_data[part_id]["GroupNO"] == 'B' else
+                    colors[2] if participant_data[part_id]["GroupNO"] == 'C' else
+                    colors[3] for part_id in participant_ids]
+
+      # Create the bar plot with assigned colors
+      plt.bar(participant_ids, stat_values, color=bar_colors)
+
+      # Create legend with group colors
+      legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in
+                         zip(['Group A', 'Group B', 'Group C'], colors)]
+      plt.legend(handles=legend_elements)
+
+      # Show the plot
+      plt.show()
+
+    # # Save the plot to the specified directory
+    # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
+
+    return
+
+def plot_box_whisker():
+
+
 if __name__ == "__main__":
     main()
+
+
 
 #
 # folder_path = "/Users/maddiewallace/PycharmProjects/AIRE_Report_Back2/outputs/"
