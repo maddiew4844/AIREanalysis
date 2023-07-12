@@ -52,165 +52,274 @@ def main():
     """
 
     logger = setup_logging()  # Set up error logger.
-    #
-    # # data_log_loc = surveyExportPrep(logger)
-    # data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
-    #
-    # # Create a list of all unique participant IDs in order.
-    # part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
-    #
-    # # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
-    # participant_data = {}
-    #
-    # # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
-    # # device ID, and airthings data.
-    # for part_id in part_id_list:
-    #
-    #     date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
-    #
-    #     # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
-    #     date_dict = convert_visit_date(date_dict, part_id)
-    #
-    #     # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
-    #     GroupNO = convert_GroupNO(GroupNO)
-    #
-    #     # Authorize and Airthings devices via API
-    #     access_token = airthings_auth()
-    #     airthings_devices = get_airthings_devices(access_token)
-    #
-    #     # Create a dictionary of all Space Pro SNs from the current device names.
-    #     SN_dict = create_SN_dict(airthings_devices)
-    #
-    #     # Pull the airthings data for the requested participant for the requested time frame.
-    #     data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
-    #
-    #     # Fill participant_data dictionary with all the info from the participant.
-    #     participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
-    #
-    # # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
-    # # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
-    # # 'summary_stats'.
-    # participant_data = prep_summary_stats(participant_data)
-    # # print(participant_data)
+
+    # data_log_loc = surveyExportPrep(logger)
+    data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
+
+    # Create a list of all unique participant IDs in order.
+    part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
+
+    # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
+    participant_data = {}
+
+    # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
+    # device ID, and airthings data.
+    for part_id in part_id_list:
+
+        date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
+
+        # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
+        date_dict = convert_visit_date(date_dict, part_id)
+
+        # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
+        GroupNO = convert_GroupNO(GroupNO)
+
+        # Authorize and Airthings devices via API
+        access_token = airthings_auth()
+        airthings_devices = get_airthings_devices(access_token)
+
+        # Create a dictionary of all Space Pro SNs from the current device names.
+        SN_dict = create_SN_dict(airthings_devices)
+
+        # Pull the airthings data for the requested participant for the requested time frame.
+        data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
+
+        # Fill participant_data dictionary with all the info from the participant.
+        participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
+
+    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
+    # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
+    # 'summary_stats'.
+    participant_data = prep_summary_stats(participant_data)
+    print(participant_data)
 
     # Define the pastel color palette
     colors = sns.color_palette('pastel')[1:5]
     # Define legend elements
     legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in
                        zip(['Group A', 'Group B', 'Group C', 'Overall'], colors)]
+    #
+    # participant_data = {
+    #     'A001': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 23, 14, 45),
+    #             '2': datetime(2023, 4, 7, 10, 10),
+    #             '3': datetime(2023, 4, 24, 16, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 10),
+    #             '2B': datetime(2023, 4, 7, 10, 11),
+    #             '3B': datetime(2023, 4, 24, 16, 1)
+    #         },
+    #         'GroupNO': 'A',
+    #         'color' : colors[0],
+    #         'airthings_id': 'A01',
+    #         'data': pandas.DataFrame({
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+    #                  '2023-03-23 23:00:00']),
+    #             'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
+    #             'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
+    #             'light': [23, 29, 22, 16, 13],
+    #             'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
+    #             'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
+    #             'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
+    #             'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
+    #             'pm25': [10, 15, 8, 5, 22]
+    #         }),
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 20.0,
+    #             'mean': 12.118873826903023,
+    #             'percentage_above_12': 40
+    #         }
+    #     },
+    #     'A002': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 27, 15, 0),
+    #             '2': datetime(2023, 4, 14, 14, 0),
+    #             '3': datetime(2023, 4, 28, 9, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 11),
+    #             '2B': datetime(2023, 4, 14, 14, 1),
+    #             '3B': datetime(2023, 4, 28, 9, 1)
+    #         },
+    #         'GroupNO': 'A',
+    #         'color': colors[0],
+    #         'airthings_id': 'A02',
+    #         'data': pandas.DataFrame({
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+    #                 '2023-03-24 19:00:00']),
+    #             'co2': [802.0, 789.0, 772.0, 942.0, 965.0],
+    #             'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
+    #             'light': [39, 35, 28, 14, 31],
+    #             'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
+    #             'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
+    #             'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
+    #             'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
+    #             'pm25': [12, 9, 18, 6, 20]
+    #         }),
+    #         'summary_stats': {
+    #             '10th_percentile': 3.0,
+    #             '25th_percentile': 4.0,
+    #             '50th_percentile': 7.0,
+    #             '75th_percentile': 15.0,
+    #             '90th_percentile': 25.0,
+    #             'max': 100,
+    #             'mean': 30,
+    #             'percentage_above_12': 20
+    #         }
+    #     },
+    #     'A003': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 28, 13, 0),
+    #             '2': datetime(2023, 4, 10, 12, 0),
+    #             '3': datetime(2023, 4, 28, 14, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 12),
+    #             '2B': datetime(2023, 4, 10, 12, 1),
+    #             '3B': datetime(2023, 4, 28, 14, 1)
+    #         },
+    #         'GroupNO': 'B',
+    #         'color': colors[1],
+    #         'airthings_id': 'A03',
+    #         'data': pandas.DataFrame({
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+    #                  '2023-03-28 21:00:00']),
+    #             'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+    #             'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #             'light': [42, 41, 44, 36, 35],
+    #             'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #             'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #             'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #             'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #             'pm25': [5, 7, 6, 3, 9]
+    #         }),
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 150.0,
+    #             'mean': 4,
+    #             'percentage_above_12': 32
+    #         }
+    #     },
+    #     'A004': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 28, 13, 0),
+    #             '2': datetime(2023, 4, 10, 12, 0),
+    #             '3': datetime(2023, 4, 28, 14, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 12),
+    #             '2B': datetime(2023, 4, 10, 12, 1),
+    #             '3B': datetime(2023, 4, 28, 14, 1)
+    #         },
+    #         'GroupNO': 'C',
+    #         'color': colors[2],
+    #         'airthings_id': 'A03',
+    #         'data': pandas.DataFrame({
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+    #                  '2023-03-28 21:00:00']),
+    #             'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+    #             'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #             'light': [42, 41, 44, 36, 35],
+    #             'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #             'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #             'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #             'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #             'pm25': [5, 7, 6, 3, 9]
+    #         }),
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 150.0,
+    #             'mean': 4,
+    #             'percentage_above_12': 32
+    #         }
+    #     },
+    #     'A005': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 28, 13, 0),
+    #             '2': datetime(2023, 4, 10, 12, 0),
+    #             '3': datetime(2023, 4, 28, 14, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 12),
+    #             '2B': datetime(2023, 4, 10, 12, 1),
+    #             '3B': datetime(2023, 4, 28, 14, 1)
+    #         },
+    #         'GroupNO': 'C',
+    #         'color': colors[2],
+    #         'airthings_id': 'A03',
+    #         'data': pandas.DataFrame({
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+    #                  '2023-03-28 21:00:00']),
+    #             'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+    #             'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #             'light': [42, 41, 44, 36, 35],
+    #             'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #             'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #             'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #             'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #             'pm25': [5, 7, 6, 3, 9]
+    #         }),
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 150.0,
+    #             'mean': 4,
+    #             'percentage_above_12': 32
+    #         }
+    #     },
+    #     'A006': {
+    #         'date_dict': {
+    #             '1': datetime(2023, 3, 23, 14, 45),
+    #             '2': datetime(2023, 4, 7, 10, 10),
+    #             '3': datetime(2023, 4, 24, 16, 0),
+    #             '4': datetime(2023, 7, 11, 12, 50, 10),
+    #             '2B': datetime(2023, 4, 7, 10, 11),
+    #             '3B': datetime(2023, 4, 24, 16, 1)
+    #         },
+    #         'GroupNO': 'B',
+    #         'color': colors[1],
+    #         'airthings_id': 'A01',
+    #         'data': pandas.DataFrame({
+    #             'time': pd.to_datetime(
+    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+    #                  '2023-03-23 23:00:00']),
+    #             'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
+    #             'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
+    #             'light': [23, 29, 22, 16, 13],
+    #             'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
+    #             'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
+    #             'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
+    #             'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
+    #             'pm25': [10, 15, 8, 5, 22]
+    #         }),
+    #         'summary_stats': {
+    #             '10th_percentile': 2.0,
+    #             '25th_percentile': 3.0,
+    #             '50th_percentile': 6.0,
+    #             '75th_percentile': 16.0,
+    #             '90th_percentile': 28.0,
+    #             'max': 20.0,
+    #             'mean': 12.118873826903023,
+    #             'percentage_above_12': 40
+    #         }
+    #     },
+    #
+    # }
 
-    participant_data = {
-        'A001': {
-            'date_dict': {
-                '1': datetime(2023, 3, 23, 14, 45),
-                '2': datetime(2023, 4, 7, 10, 10),
-                '3': datetime(2023, 4, 24, 16, 0),
-                '4': datetime(2023, 7, 11, 12, 50, 10),
-                '2B': datetime(2023, 4, 7, 10, 11),
-                '3B': datetime(2023, 4, 24, 16, 1)
-            },
-            'GroupNO': 'A',
-            'color' : colors[0],
-            'airthings_id': 'A01',
-            'data': {
-                'time': pd.to_datetime(
-                    ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
-                     '2023-03-23 23:00:00']),
-                'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
-                'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
-                'light': [23, 29, 22, 16, 13],
-                'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
-                'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
-                'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
-                'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
-                'pm25': [10, 15, 8, 5, 22]
-            },
-            'summary_stats': {
-                '10th_percentile': 2.0,
-                '25th_percentile': 3.0,
-                '50th_percentile': 6.0,
-                '75th_percentile': 16.0,
-                '90th_percentile': 28.0,
-                'max': 20.0,
-                'mean': 12.118873826903023,
-                'percentage_above_12': 40
-            }
-        },
-        'A002': {
-            'date_dict': {
-                '1': datetime(2023, 3, 27, 15, 0),
-                '2': datetime(2023, 4, 14, 14, 0),
-                '3': datetime(2023, 4, 28, 9, 0),
-                '4': datetime(2023, 7, 11, 12, 50, 11),
-                '2B': datetime(2023, 4, 14, 14, 1),
-                '3B': datetime(2023, 4, 28, 9, 1)
-            },
-            'GroupNO': 'A',
-            'color': colors[0],
-            'airthings_id': 'A02',
-            'data': {
-                'time': pd.to_datetime(
-                    ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
-                    '2023-03-24 19:00:00']),
-                'co2': [802.0, 789.0, 772.0, 942.0, 965.0],
-                'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
-                'light': [39, 35, 28, 14, 31],
-                'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
-                'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
-                'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
-                'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
-                'pm25': [12, 9, 18, 6, 20]
-            },
-            'summary_stats': {
-                '10th_percentile': 3.0,
-                '25th_percentile': 4.0,
-                '50th_percentile': 7.0,
-                '75th_percentile': 15.0,
-                '90th_percentile': 25.0,
-                'max': 100,
-                'mean': 30,
-                'percentage_above_12': 20
-            }
-        },
-        'A003': {
-            'date_dict': {
-                '1': datetime(2023, 3, 28, 13, 0),
-                '2': datetime(2023, 4, 10, 12, 0),
-                '3': datetime(2023, 4, 28, 14, 0),
-                '4': datetime(2023, 7, 11, 12, 50, 12),
-                '2B': datetime(2023, 4, 10, 12, 1),
-                '3B': datetime(2023, 4, 28, 14, 1)
-            },
-            'GroupNO': 'B',
-            'color': colors[1],
-            'airthings_id': 'A03',
-            'data': {
-                'time': pd.to_datetime(
-                    ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
-                     '2023-03-28 21:00:00']),
-                'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
-                'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
-                'light': [42, 41, 44, 36, 35],
-                'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
-                'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
-                'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
-                'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
-                'pm25': [5, 7, 6, 3, 9]
-            },
-            'summary_stats': {
-                '10th_percentile': 2.0,
-                '25th_percentile': 3.0,
-                '50th_percentile': 6.0,
-                '75th_percentile': 16.0,
-                '90th_percentile': 28.0,
-                'max': 150.0,
-                'mean': 4,
-                'percentage_above_12': 32
-            }
-        },
-    }
-
-    # Create 3 lists, containing all participant IDs for participants of each educational group.
+    #Create 3 lists, containing all participant IDs for participants of each educational group.
     educational_groups = group_lists(participant_data)
 
     # Location to save graphs.
@@ -687,7 +796,8 @@ def prep_summary_stats(participant_data):
         elif group == 'C':
             data_groups['group_C'].extend(pm25_column)
 
-        # Calculate summary stats for current individual participant. Add them to participant_data.
+        # Calculate summary stats for current individual participant. Add the summary stats and the data list to
+        # participant_data
         summary_statistics = calculate_summary_stats(pm25_column)
         participant_data[part_id]['summary_stats'] = summary_statistics
 
@@ -695,7 +805,10 @@ def prep_summary_stats(participant_data):
     for data_grouping, data_list in data_groups.items():
         summary_statistics = calculate_summary_stats(data_list)
         participant_data[data_grouping] = {}
+
+        # Add the summary stats and the combined data to participant_data
         participant_data[data_grouping]['summary_stats'] = summary_statistics
+        participant_data[data_grouping]['data'] = pandas.DataFrame({'pm25': data_list})
 
     # Add a "GroupNO" key for all entries in data_groups.
     for key in data_groups.keys():
@@ -828,11 +941,10 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
 
     # Create a nested list of 'pm25' values for all participants
     for part_id in participant_ids:
-        if 'data' in participant_data[part_id]:
-            data_values.append(participant_data[part_id]['data']['pm25'])
+        data_values.append(participant_data[part_id]['data']['pm25'])
 
     # Create a box and whisker plot with all participants
-    bp = plt.boxplot(data_values, patch_artist=True, showfliers=True)
+    bp = plt.boxplot(data_values, patch_artist=True, showfliers=False)
 
     # Set the facecolor of each box based on participant's color.
     for i, box in enumerate(bp['boxes']):
@@ -855,165 +967,10 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
     # Show the plot
     plt.show()
 
+    return
+
+
+
 
 if __name__ == "__main__":
     main()
-
-
-
-#
-# folder_path = "/Users/maddiewallace/PycharmProjects/AIRE_Report_Back2/outputs/"
-# csv_files = [file for file in os.listdir(folder_path) if file.endswith(".csv")]
-#
-# group_a = ['A001', 'A004', 'A007', 'A010', 'A013']
-# group_b = ['A002', 'A005', 'A008', 'A011', 'A014']
-# group_c = ['A003', 'A006', 'A009', 'A012', 'A015']
-#
-# pm25_data = {}
-#
-# for file in csv_files:
-#     file_path = os.path.join(folder_path, file)
-#     participant_id = os.path.splitext(file)[0]
-#     data = pd.read_csv(file_path)
-#     data['pm25'] = pd.to_numeric(data['pm25'], errors='coerce')  # Convert 'PM2.5' column to numeric
-#     pm25_data[participant_id] = data['pm25'].dropna().tolist()
-#
-# def calculate_summary_statistics(data):
-#     summary_stats = {}
-#     all_values = []
-#
-#     for participant, values in data.items():
-#         summary_stats[participant] = {}
-#         values = np.array(values)
-#
-#         # Calculate summary statistics
-#         summary_stats[participant]['10th_percentile'] = np.percentile(values, 10)
-#         summary_stats[participant]['25th_percentile'] = np.percentile(values, 25)
-#         summary_stats[participant]['50th_percentile'] = np.percentile(values, 50)
-#         summary_stats[participant]['75th_percentile'] = np.percentile(values, 75)
-#         summary_stats[participant]['90th_percentile'] = np.percentile(values, 90)
-#         summary_stats[participant]['max'] = np.max(values)
-#         summary_stats[participant]['mean'] = np.mean(values)
-#         summary_stats[participant]['percentage_above_12'] = (np.sum(values > 12) / len(values)) * 100
-#
-#         all_values.extend(values)
-#
-#     # Calculate summary statistics for the entire dataset
-#     all_values = np.array(all_values)
-#     summary_stats['overall'] = {
-#         '10th_percentile': np.percentile(all_values, 10),
-#         '25th_percentile': np.percentile(all_values, 25),
-#         '50th_percentile': np.percentile(all_values, 50),
-#         '75th_percentile': np.percentile(all_values, 75),
-#         '90th_percentile': np.percentile(all_values, 90),
-#         'max': np.max(all_values),
-#         'mean': np.mean(all_values),
-#         'percentage_above_12': (np.sum(all_values > 12) / len(all_values)) * 100
-#     }
-#
-#     return summary_stats
-#
-# # Call the function with the data
-# summary_stats = calculate_summary_statistics(pm25_data)
-#
-# # Create a DataFrame for participant statistics
-# df_participants = pd.DataFrame.from_dict(summary_stats, orient='index')
-#
-# # Sort the participants in ascending order based on the participant ID
-# df_participants = df_participants.reindex(sorted(df_participants.index))
-#
-# # Save the DataFrame as a CSV file
-# output_path = "/Users/maddiewallace/PycharmProjects/AIRE_Report_Back2/summary_stats/summary_stats.csv"
-# df_participants.to_csv(output_path, index=True)
-#
-# # Define colors for each participant group
-# group_colors = {'Group A': 'green', 'Group B': 'blue', 'Group C': 'yellow'}
-#
-# # Plotting percentage above 12
-# plt.figure(figsize=(10, 6))
-# plt.bar(df_participants.index, df_participants['percentage_above_12'], label='Percentage Above 12',
-#         color=[group_colors['Group A'] if participant in group_a else
-#                group_colors['Group B'] if participant in group_b else
-#                group_colors['Group C']
-#                for participant in df_participants.index])
-# plt.bar('overall', df_participants.loc['overall', 'percentage_above_12'], label='Overall', color='orange')
-# plt.title('Percentage of Time PM2.5 is Above 12')
-# plt.xlabel('Participant')
-# plt.ylabel('Percentage')
-# plt.xticks(rotation=45)
-#
-# # Create legend with group colors
-# legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in group_colors.items()]
-# plt.legend(handles=legend_elements)
-# plt.show()
-#
-# # Plotting maximum values
-# plt.figure(figsize=(10, 6))
-# plt.bar(df_participants.index, df_participants['max'], label='Maximum',
-#         color=[group_colors['Group A'] if participant in group_a else
-#                group_colors['Group B'] if participant in group_b else
-#                group_colors['Group C']
-#                for participant in df_participants.index])
-# plt.bar('overall', df_participants.loc['overall', 'max'], label='Overall', color='orange')
-# plt.title('Maximum PM2.5 Values')
-# plt.xlabel('Participant')
-# plt.ylabel('PM2.5')
-# plt.xticks(rotation=45)
-#
-# # Create legend with group colors
-# legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in group_colors.items()]
-# plt.legend(handles=legend_elements)
-# plt.show()
-#
-# # Plotting mean values
-# plt.figure(figsize=(10, 6))
-# plt.bar(df_participants.index, df_participants['mean'], label='Mean',
-#         color=[group_colors['Group A'] if participant in group_a else
-#                group_colors['Group B'] if participant in group_b else
-#                group_colors['Group C']
-#                for participant in df_participants.index])
-# plt.bar('overall', df_participants.loc['overall', 'mean'], label='Overall', color='orange')
-# plt.title('Mean')
-# plt.xlabel('Participant')
-# plt.ylabel('Percentage')
-#
-# # Create legend with group colors
-# legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in group_colors.items()]
-# plt.legend(handles=legend_elements)
-# plt.show()
-#
-# # # Combine participant data into a list
-# # participant_data = [pm25_data[participant] for participant in df_participants.index if participant != 'overall']
-# #
-# # # Create labels for the box plot
-# # labels = [participant for participant in df_participants.index if participant != 'overall']
-# #
-# # # Plot box and whisker plot
-# # plt.figure(figsize=(10, 6))
-# # plt.boxplot(participant_data, labels=labels, patch_artist=True)
-# #
-# # # Set colors for each participant group
-# # for patch, participant in zip(plt.gca().artists, labels):
-# #     if participant in group_a:
-# #         patch.set_facecolor(group_colors['Group A'])
-# #     elif participant in group_b:
-# #         patch.set_facecolor(group_colors['Group B'])
-# #     elif participant in group_c:
-# #         patch.set_facecolor(group_colors['Group C'])
-# #
-# # # Set color for the overall box
-# # overall_patch = plt.gca().artists[0]
-# # overall_patch.set_facecolor('red')
-# #
-# # plt.title('PM2.5 Distribution')
-# # plt.xlabel('Participant')
-# # plt.ylabel('PM2.5')
-# # plt.xticks(rotation=45)
-# #
-# # # Create legend with group colors
-# # legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in group_colors.items()]
-# # legend_elements.append(plt.bar(0, 0, color='red', label='Overall'))
-# # plt.legend(handles=legend_elements)
-# #
-# # plt.show()
-#
