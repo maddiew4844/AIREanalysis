@@ -53,7 +53,6 @@ def main():
 
     logger = setup_logging()  # Set up error logger.
     #
-    #
     # # data_log_loc = surveyExportPrep(logger)
     # data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
     #
@@ -98,7 +97,7 @@ def main():
     colors = sns.color_palette('pastel')[1:5]
     # Define legend elements
     legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in
-                       zip(['Group A', 'Group B', 'Group C', 'Other'], colors)]
+                       zip(['Group A', 'Group B', 'Group C', 'Overall'], colors)]
 
     participant_data = {
         'A001': {
@@ -218,8 +217,8 @@ def main():
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
     # graph_group_timeseries(participant_data, educational_groups, graph_location)
-    # plot_summaries(participant_data, graph_location)
-    plot_box_whisker(participant_data, colors, legend_elements, graph_location)
+    # plot_summaries(participant_data, legend_elements, graph_location)
+    plot_box_whisker(participant_data, legend_elements, graph_location)
 
     return
 
@@ -782,6 +781,7 @@ def graph_group_timeseries(participant_data, educational_groups, graph_location)
         plt.title(f'PM2.5 vs Time for AIRE Group {ed_group}', fontdict={'fontweight': 'bold', 'fontsize': 18})
         plt.xlabel('Timestamp')
         plt.ylabel('PM2.5')
+        plt.xticks(rotation=45)
 
         # Go through all participants of the current educational group, plotting PM2.5 vs time.
         participants = educational_groups[ed_group]
@@ -791,8 +791,10 @@ def graph_group_timeseries(participant_data, educational_groups, graph_location)
             line_style = line_styles[i % len(line_styles)]
             marker = markers[i % len(markers)]
 
-            # Plot PM2.5 vs time using the specified color, line style, and marker.
-            plt.plot(participant_data[part_id]['data']['time'], participant_data[part_id]['data']['pm25'], color=color,
+            # Plot PM2.5 vs time using the specified color, line style, and marker. Plot only the participants, not the
+            # overall entries as they do not have data.
+            if 'data' in participant_data[part_id]:
+                plt.plot(participant_data[part_id]['data']['time'], participant_data[part_id]['data']['pm25'], color=color,
                      linestyle=line_style, marker=marker, linewidth=1, markersize=2, label=part_id)
 
         plt.legend()
@@ -813,46 +815,10 @@ def save_graph(graph_location, file_name):
 
     return
 
-def plot_summaries(participant_data, colors, legend_elements, graph_location):
-    """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
-    includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
-    by group assignment.
-    Args:
-        participant_data (dict) : nested dictionary with participant IDs as keys as all data as values.
-        colors (list) : list of 4 colors used to color code based on group assignment.
-        legend_elements (list) : defines color coding for legend.
-        graph_location (str) : pathway to where graphs are saved.
-    """
-    participant_ids = list(participant_data.keys())
-
-    # Create a bar chart for each summary statistic.
-    for sum_stat in ['max', 'mean', 'percentage_above_12']:
-        plt.figure()
-        plt.figure(figsize=(8, 5), dpi=150)
-        plt.title(f'{sum_stat} vs participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
-        plt.xlabel('Participant')
-        plt.ylabel(sum_stat)
-
-        # Retrieve the summary statistic values for each participant
-        stat_values = [participant_data[part_id]['summary_stats'][sum_stat] for part_id in participant_ids]
-
-        # # Create the bar plot with assigned colors, create legend.
-        # plt.bar(participant_ids, stat_values, color=[participant_data[part_id]['color'])
-        # plt.legend(handles=legend_elements)
-
-        # # Show the plot
-        # plt.show()
-
-        # # Save the plot to the specified directory
-        # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
-
-    return
-
-def plot_box_whisker(participant_data, colors, legend_elements, graph_location):
+def plot_box_whisker(participant_data, legend_elements, graph_location):
     """Creates a box and whisker plot for the 'pm25' values of all participants.
     Args:
-        participant_data (dict) : nested dictionary with participant IDs as keys as all data as values.
-        colors (list) : list of 4 colors used to color code based on group assignment.
+        participant_data (dict) : nested dictionary with participant IDs as keys and all data as values.
         legend_elements (list) : defines color coding for legend.
         graph_location (str) : pathway to where graphs are saved.
     """
@@ -868,10 +834,9 @@ def plot_box_whisker(participant_data, colors, legend_elements, graph_location):
     # Create a box and whisker plot with all participants
     bp = plt.boxplot(data_values, patch_artist=True, showfliers=True)
 
-    # Set the facecolor of each box based on participant's color. If there is no 'color' key, set as the 'other' color
+    # Set the facecolor of each box based on participant's color.
     for i, box in enumerate(bp['boxes']):
-        color = participant_data[participant_ids[i]].get('color', colors[3])
-        box.set_facecolor(color)
+        box.set_facecolor(participant_data[participant_ids[i]]['color'])
 
     # Set the color of median line to black
     for median in bp['medians']:
@@ -880,14 +845,16 @@ def plot_box_whisker(participant_data, colors, legend_elements, graph_location):
     # Set labels and title
     plt.xlabel('Participant')
     plt.ylabel('PM2.5')
-    plt.title('Box and Whisker Plots')
+    plt.title('Box and Whisker Plot')
     plt.legend(handles=legend_elements)
 
     # Set the x-axis tick labels as participant IDs
     plt.xticks(range(1, len(participant_ids) + 1), participant_ids)
+    plt.xticks(rotation=45)
 
     # Show the plot
     plt.show()
+
 
 if __name__ == "__main__":
     main()
