@@ -52,155 +52,164 @@ def main():
     """
 
     logger = setup_logging()  # Set up error logger.
+    #
+    #
+    # # data_log_loc = surveyExportPrep(logger)
+    # data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
+    #
+    # # Create a list of all unique participant IDs in order.
+    # part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
+    #
+    # # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
+    # participant_data = {}
+    #
+    # # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
+    # # device ID, and airthings data.
+    # for part_id in part_id_list:
+    #
+    #     date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
+    #
+    #     # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
+    #     date_dict = convert_visit_date(date_dict, part_id)
+    #
+    #     # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
+    #     GroupNO = convert_GroupNO(GroupNO)
+    #
+    #     # Authorize and Airthings devices via API
+    #     access_token = airthings_auth()
+    #     airthings_devices = get_airthings_devices(access_token)
+    #
+    #     # Create a dictionary of all Space Pro SNs from the current device names.
+    #     SN_dict = create_SN_dict(airthings_devices)
+    #
+    #     # Pull the airthings data for the requested participant for the requested time frame.
+    #     data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
+    #
+    #     # Fill participant_data dictionary with all the info from the participant.
+    #     participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
+    #
+    # # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
+    # # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
+    # # 'summary_stats'.
+    # participant_data = prep_summary_stats(participant_data)
+    # # print(participant_data)
 
+    # Define the pastel color palette
+    colors = sns.color_palette('pastel')[1:5]
+    # Define legend elements
+    legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in
+                       zip(['Group A', 'Group B', 'Group C', 'Other'], colors)]
 
-    # data_log_loc = surveyExportPrep(logger)
-    data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
-
-    # Create a list of all unique participant IDs in order.
-    part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
-
-    # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
-    participant_data = {}
-
-    # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
-    # device ID, and airthings data.
-    for part_id in part_id_list:
-
-        date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
-
-        # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
-        date_dict = convert_visit_date(date_dict, part_id)
-
-        # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
-        GroupNO = convert_GroupNO(GroupNO)
-
-        # Authorize and Airthings devices via API
-        access_token = airthings_auth()
-        airthings_devices = get_airthings_devices(access_token)
-
-        # Create a dictionary of all Space Pro SNs from the current device names.
-        SN_dict = create_SN_dict(airthings_devices)
-
-        # Pull the airthings data for the requested participant for the requested time frame.
-        data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
-
-        # Fill participant_data dictionary with all the info from the participant.
-        participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
-
-    # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
-    # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
-    # 'summary_stats'.
-    participant_data = prep_summary_stats(participant_data)
-    # print(participant_data)
-
-    # participant_data = {
-    #     'A001': {
-    #         'date_dict': {
-    #             '1': datetime(2023, 3, 23, 14, 45),
-    #             '2': datetime(2023, 4, 7, 10, 10),
-    #             '3': datetime(2023, 4, 24, 16, 0),
-    #             '4': datetime(2023, 7, 11, 12, 50, 10),
-    #             '2B': datetime(2023, 4, 7, 10, 11),
-    #             '3B': datetime(2023, 4, 24, 16, 1)
-    #         },
-    #         'GroupNO': 'A',
-    #         'airthings_id': 'A01',
-    #         'data': {
-    #             'time': pd.to_datetime(
-    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
-    #                  '2023-03-23 23:00:00']),
-    #             'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
-    #             'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
-    #             'light': [23, 29, 22, 16, 13],
-    #             'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
-    #             'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
-    #             'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
-    #             'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
-    #             'pm25': [10, 15, 8, 5, 22]
-    #         },
-    #         'summary_stats': {
-    #             '10th_percentile': 2.0,
-    #             '25th_percentile': 3.0,
-    #             '50th_percentile': 6.0,
-    #             '75th_percentile': 16.0,
-    #             '90th_percentile': 28.0,
-    #             'max': 20.0,
-    #             'mean': 12.118873826903023,
-    #             'percentage_above_12': 40
-    #         }
-    #     },
-    #     'A002': {
-    #         'date_dict': {
-    #             '1': datetime(2023, 3, 27, 15, 0),
-    #             '2': datetime(2023, 4, 14, 14, 0),
-    #             '3': datetime(2023, 4, 28, 9, 0),
-    #             '4': datetime(2023, 7, 11, 12, 50, 11),
-    #             '2B': datetime(2023, 4, 14, 14, 1),
-    #             '3B': datetime(2023, 4, 28, 9, 1)
-    #         },
-    #         'GroupNO': 'A',
-    #         'airthings_id': 'A02',
-    #         'data': {
-    #             'time': pd.to_datetime(
-    #                 ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
-    #                 '2023-03-24 19:00:00']),
-    #             'co2': [802.0, 789.0, 772.0, 942.0, 965.0],
-    #             'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
-    #             'light': [39, 35, 28, 14, 31],
-    #             'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
-    #             'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
-    #             'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
-    #             'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
-    #             'pm25': [12, 9, 18, 6, 20]
-    #         },
-    #         'summary_stats': {
-    #             '10th_percentile': 3.0,
-    #             '25th_percentile': 4.0,
-    #             '50th_percentile': 7.0,
-    #             '75th_percentile': 15.0,
-    #             '90th_percentile': 25.0,
-    #             'max': 100,
-    #             'mean': 30,
-    #             'percentage_above_12': 20
-    #         }
-    #     },
-    #     'A003': {
-    #         'date_dict': {
-    #             '1': datetime(2023, 3, 28, 13, 0),
-    #             '2': datetime(2023, 4, 10, 12, 0),
-    #             '3': datetime(2023, 4, 28, 14, 0),
-    #             '4': datetime(2023, 7, 11, 12, 50, 12),
-    #             '2B': datetime(2023, 4, 10, 12, 1),
-    #             '3B': datetime(2023, 4, 28, 14, 1)
-    #         },
-    #         'GroupNO': 'B',
-    #         'airthings_id': 'A03',
-    #         'data': {
-    #             'time': pd.to_datetime(
-    #                 ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
-    #                  '2023-03-28 21:00:00']),
-    #             'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
-    #             'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
-    #             'light': [42, 41, 44, 36, 35],
-    #             'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
-    #             'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
-    #             'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
-    #             'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
-    #             'pm25': [5, 7, 6, 3, 9]
-    #         },
-    #         'summary_stats': {
-    #             '10th_percentile': 2.0,
-    #             '25th_percentile': 3.0,
-    #             '50th_percentile': 6.0,
-    #             '75th_percentile': 16.0,
-    #             '90th_percentile': 28.0,
-    #             'max': 150.0,
-    #             'mean': 4,
-    #             'percentage_above_12': 32
-    #         }
-    #     },
-    # }
+    participant_data = {
+        'A001': {
+            'date_dict': {
+                '1': datetime(2023, 3, 23, 14, 45),
+                '2': datetime(2023, 4, 7, 10, 10),
+                '3': datetime(2023, 4, 24, 16, 0),
+                '4': datetime(2023, 7, 11, 12, 50, 10),
+                '2B': datetime(2023, 4, 7, 10, 11),
+                '3B': datetime(2023, 4, 24, 16, 1)
+            },
+            'GroupNO': 'A',
+            'color' : colors[0],
+            'airthings_id': 'A01',
+            'data': {
+                'time': pd.to_datetime(
+                    ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+                     '2023-03-23 23:00:00']),
+                'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
+                'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
+                'light': [23, 29, 22, 16, 13],
+                'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
+                'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
+                'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
+                'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
+                'pm25': [10, 15, 8, 5, 22]
+            },
+            'summary_stats': {
+                '10th_percentile': 2.0,
+                '25th_percentile': 3.0,
+                '50th_percentile': 6.0,
+                '75th_percentile': 16.0,
+                '90th_percentile': 28.0,
+                'max': 20.0,
+                'mean': 12.118873826903023,
+                'percentage_above_12': 40
+            }
+        },
+        'A002': {
+            'date_dict': {
+                '1': datetime(2023, 3, 27, 15, 0),
+                '2': datetime(2023, 4, 14, 14, 0),
+                '3': datetime(2023, 4, 28, 9, 0),
+                '4': datetime(2023, 7, 11, 12, 50, 11),
+                '2B': datetime(2023, 4, 14, 14, 1),
+                '3B': datetime(2023, 4, 28, 9, 1)
+            },
+            'GroupNO': 'A',
+            'color': colors[0],
+            'airthings_id': 'A02',
+            'data': {
+                'time': pd.to_datetime(
+                    ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+                    '2023-03-24 19:00:00']),
+                'co2': [802.0, 789.0, 772.0, 942.0, 965.0],
+                'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
+                'light': [39, 35, 28, 14, 31],
+                'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
+                'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
+                'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
+                'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
+                'pm25': [12, 9, 18, 6, 20]
+            },
+            'summary_stats': {
+                '10th_percentile': 3.0,
+                '25th_percentile': 4.0,
+                '50th_percentile': 7.0,
+                '75th_percentile': 15.0,
+                '90th_percentile': 25.0,
+                'max': 100,
+                'mean': 30,
+                'percentage_above_12': 20
+            }
+        },
+        'A003': {
+            'date_dict': {
+                '1': datetime(2023, 3, 28, 13, 0),
+                '2': datetime(2023, 4, 10, 12, 0),
+                '3': datetime(2023, 4, 28, 14, 0),
+                '4': datetime(2023, 7, 11, 12, 50, 12),
+                '2B': datetime(2023, 4, 10, 12, 1),
+                '3B': datetime(2023, 4, 28, 14, 1)
+            },
+            'GroupNO': 'B',
+            'color': colors[1],
+            'airthings_id': 'A03',
+            'data': {
+                'time': pd.to_datetime(
+                    ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+                     '2023-03-28 21:00:00']),
+                'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+                'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+                'light': [42, 41, 44, 36, 35],
+                'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+                'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+                'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+                'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+                'pm25': [5, 7, 6, 3, 9]
+            },
+            'summary_stats': {
+                '10th_percentile': 2.0,
+                '25th_percentile': 3.0,
+                '50th_percentile': 6.0,
+                '75th_percentile': 16.0,
+                '90th_percentile': 28.0,
+                'max': 150.0,
+                'mean': 4,
+                'percentage_above_12': 32
+            }
+        },
+    }
 
     # Create 3 lists, containing all participant IDs for participants of each educational group.
     educational_groups = group_lists(participant_data)
@@ -209,7 +218,8 @@ def main():
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
     # graph_group_timeseries(participant_data, educational_groups, graph_location)
-    plot_summaries(participant_data, graph_location)
+    # plot_summaries(participant_data, graph_location)
+    plot_box_whisker(participant_data, colors, legend_elements, graph_location)
 
     return
 
@@ -569,6 +579,7 @@ def pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict,
 
 def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df):
     """Fills the participant_data dictionary with all the info for the current participant.
+
     Args:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
         group_assignment.
@@ -581,7 +592,6 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
     returns:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
         group_assignment.
-
     """
 
     # Add the part_id as a key in the participant_data dict with a nested info.
@@ -589,8 +599,40 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
         'date_dict': date_dict,
         'GroupNO': GroupNO,
         'airthings_id': airthings_id,
-        'data': data_df
+        'data': data_df,
     }
+
+    # Assign a color based on the GroupNO.
+    participant_data = assign_color(participant_data, part_id, GroupNO)
+
+    return participant_data
+
+def assign_color(participant_data, part_id, GroupNO):
+    """Adds a color code based on the GroupNO of the participant.
+    Args:
+        participant_data (dict) : nested dictionary containing participant IDs as keys, their date_dict, and
+        group_assignment.
+        part_id (str) : participant ID
+        GroupNO (str) : educational group assignment of the given participant (A, B, or C).
+
+    Returns:
+        participant_data (dict) : nested dictionary containing participant IDs as keys, their date_dict, and
+        group_assignment. Now containing color assignment.
+    """
+
+    # Define the pastel color palette
+    colors = sns.color_palette('pastel')[1:5]
+    # Assign colors based on 'GroupNO' value
+    if GroupNO == 'A':
+        color = colors[0]
+    elif GroupNO == 'B':
+        color = colors[1]
+    elif GroupNO == 'C':
+        color = colors[2]
+    else:
+        color = colors[3]
+
+    participant_data[part_id]['color'] = color
 
     return participant_data
 
@@ -656,12 +698,14 @@ def prep_summary_stats(participant_data):
         participant_data[data_grouping] = {}
         participant_data[data_grouping]['summary_stats'] = summary_statistics
 
-    # Add a "GroupNO" key for data_groups.
+    # Add a "GroupNO" key for all entries in data_groups.
     for key in data_groups.keys():
         participant_data[key]["GroupNO"] = key[-1]
+        # Add color code for all entries in data_groups.
+        participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
 
 
-    return participant_data#, data_groups
+    return participant_data
 
 def calculate_summary_stats(pm25_column):
     """ Calculate the summary statistics for a given set of PM2.5 values and return them in a dictionary.
@@ -769,51 +813,81 @@ def save_graph(graph_location, file_name):
 
     return
 
-def plot_summaries(participant_data, graph_location):
-  """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
-  includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
-  by group assignment."""
+def plot_summaries(participant_data, colors, legend_elements, graph_location):
+    """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
+    includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
+    by group assignment.
+    Args:
+        participant_data (dict) : nested dictionary with participant IDs as keys as all data as values.
+        colors (list) : list of 4 colors used to color code based on group assignment.
+        legend_elements (list) : defines color coding for legend.
+        graph_location (str) : pathway to where graphs are saved.
+    """
+    participant_ids = list(participant_data.keys())
 
-  participant_ids = list(participant_data.keys())
+    # Create a bar chart for each summary statistic.
+    for sum_stat in ['max', 'mean', 'percentage_above_12']:
+        plt.figure()
+        plt.figure(figsize=(8, 5), dpi=150)
+        plt.title(f'{sum_stat} vs participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
+        plt.xlabel('Participant')
+        plt.ylabel(sum_stat)
 
-  # Define the pastel color palette
-  colors = sns.color_palette('pastel')[1:5]
+        # Retrieve the summary statistic values for each participant
+        stat_values = [participant_data[part_id]['summary_stats'][sum_stat] for part_id in participant_ids]
 
-  # Create a bar chart for each summary statistic.
-  for sum_stat in ['max', 'mean', 'percentage_above_12']:
-      plt.figure()
-      plt.figure(figsize=(8, 5), dpi=150)
-      plt.title(f'{sum_stat} vs participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
-      plt.xlabel('Participant')
-      plt.ylabel(sum_stat)
+        # # Create the bar plot with assigned colors, create legend.
+        # plt.bar(participant_ids, stat_values, color=[participant_data[part_id]['color'])
+        # plt.legend(handles=legend_elements)
 
-      # Retrieve the summary statistic values for each participant
-      stat_values = [participant_data[part_id]['summary_stats'][sum_stat] for part_id in participant_ids]
+        # # Show the plot
+        # plt.show()
 
-      # Assign colors based on 'GroupNO' value
-      bar_colors = [colors[0] if participant_data[part_id]["GroupNO"] == 'A' else
-                    colors[1] if participant_data[part_id]["GroupNO"] == 'B' else
-                    colors[2] if participant_data[part_id]["GroupNO"] == 'C' else
-                    colors[3] for part_id in participant_ids]
-
-      # Create the bar plot with assigned colors
-      plt.bar(participant_ids, stat_values, color=bar_colors)
-
-      # Create legend with group colors
-      legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in
-                         zip(['Group A', 'Group B', 'Group C'], colors)]
-      plt.legend(handles=legend_elements)
-
-      # Show the plot
-      plt.show()
-
-    # # Save the plot to the specified directory
-    # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
+        # # Save the plot to the specified directory
+        # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
 
     return
 
-def plot_box_whisker():
+def plot_box_whisker(participant_data, colors, legend_elements, graph_location):
+    """Creates a box and whisker plot for the 'pm25' values of all participants.
+    Args:
+        participant_data (dict) : nested dictionary with participant IDs as keys as all data as values.
+        colors (list) : list of 4 colors used to color code based on group assignment.
+        legend_elements (list) : defines color coding for legend.
+        graph_location (str) : pathway to where graphs are saved.
+    """
+    # Extract participant IDs and their corresponding 'pm25' values
+    participant_ids = list(participant_data.keys())
+    data_values = []
 
+    # Create a nested list of 'pm25' values for all participants
+    for part_id in participant_ids:
+        if 'data' in participant_data[part_id]:
+            data_values.append(participant_data[part_id]['data']['pm25'])
+
+    # Create a box and whisker plot with all participants
+    bp = plt.boxplot(data_values, patch_artist=True, showfliers=True)
+
+    # Set the facecolor of each box based on participant's color. If there is no 'color' key, set as the 'other' color
+    for i, box in enumerate(bp['boxes']):
+        color = participant_data[participant_ids[i]].get('color', colors[3])
+        box.set_facecolor(color)
+
+    # Set the color of median line to black
+    for median in bp['medians']:
+        median.set(color='black')
+
+    # Set labels and title
+    plt.xlabel('Participant')
+    plt.ylabel('PM2.5')
+    plt.title('Box and Whisker Plots')
+    plt.legend(handles=legend_elements)
+
+    # Set the x-axis tick labels as participant IDs
+    plt.xticks(range(1, len(participant_ids) + 1), participant_ids)
+
+    # Show the plot
+    plt.show()
 
 if __name__ == "__main__":
     main()
