@@ -91,7 +91,6 @@ def main():
     # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
     # 'summary_stats'.
     participant_data = prep_summary_stats(participant_data)
-    print(participant_data)
 
     # Define the pastel color palette
     colors = sns.color_palette('pastel')[1:5]
@@ -370,14 +369,14 @@ def surveyExportPrep(logger):
 
     # Confirms proper file format.
     if fileFormat not in ["csv", "tsv", "spss"]:
-        print('fileFormat must be either csv, tsv, or spss')
+        logging.error('fileFormat must be either csv, tsv, or spss')
         sys.exit(2)
 
     # Confirms survey ID.
     r = re.compile('^SV_.*')
     m = r.match(surveyId)
     if not m:
-        print("survey Id must match ^SV_.*")
+        loggin.error("survey Id must match ^SV_.*")
         sys.exit(2)
 
     # Exports survey to local device.
@@ -526,7 +525,16 @@ def convert_visit_date(date_dict, part_id):
     for key in date_dict.keys():
         if isinstance((date_dict[key]), list):
             date_dict[key] = ''.join(date_dict[key])
-        date_dict[key] = datetime.strptime(date_dict[key], '%m-%d-%Y %H:%M')
+        try:
+            # Try parsing the date string using the format '%m-%d-%Y %H:%M'
+            date_dict[key] = datetime.strptime(date_dict[key], '%m-%d-%Y %H:%M')
+        except ValueError:
+            try:
+                # If parsing with '%m-%d-%Y %H:%M' fails, try parsing with '%m/%d/%y %H:%M'
+                date_dict[key] = datetime.strptime(date_dict[key], '%m/%d/%y %H:%M')
+            except ValueError:
+                # Handle the case when both formats fail
+                logging.error(f"Invalid date format: {date_dict[key]}!")
 
     # Confirm that the given participant is not missing visits 1-3.
     for visit in ['1', '2', '3']:
@@ -537,7 +545,7 @@ def convert_visit_date(date_dict, part_id):
 
     # Add the start date for the intervention and follow-up periods under the key {visit_num}B.
     for key in ['2', '3']:
-        date_dict["{}{}".format(key, "B")] = date_dict[key] + timedelta(minutes=1)
+        date_dict[f"{key}{'B'}"] = date_dict[key] + timedelta(minutes=1)
 
     # to download all data through today (except for A004 who did not keep their monitor):
     #TODO: automate choice of downloading through current date or through visit 4 or through visit 5.
@@ -604,7 +612,7 @@ def get_airthings_devices(access_token):
     if response.status_code == 200:
         airthings_devices = response.json()
     else:
-        print(f"Request failed with status code {response.status_code}")
+        logging.error(f"Request failed with status code {response.status_code}")
 
     return airthings_devices
 
@@ -676,11 +684,16 @@ def pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict,
         # Convert time column from ISO8601 to datetime objects
         data_df['time'] = pandas.to_datetime(data_df['time'], unit='s')
 
+        # Drop nan values from the pm25 column and convert to numeric.
+        data_df['pm25'] = data_df["pm25"].dropna()
+        data_df['pm25'] = pd.to_numeric(data_df['pm25'], errors='coerce')  # Convert 'PM2.5' column to numeric
+
+
         # Reorder the columns so that 'time' is the first column
         data_df = data_df.reindex(columns=['time'] + list(data_df.columns.drop('time')))
 
     else:
-        print(f"Get request for Airthings {airthings_id} for participant {part_id} failed with status code "
+        logging.error(f"Get request for Airthings {airthings_id} for participant {part_id} failed with status code "
               f"{response.status_code}")
 
     return data_df
@@ -783,7 +796,6 @@ def prep_summary_stats(participant_data):
             raise KeyError("'pm25' column not found in the DataFrame.")
         else:
             pm25_column = data["pm25"]
-            pm25_column = data["pm25"].dropna().tolist()
 
         # Add the data to the overall data list and to its respective group list.
         data_groups['overall'].extend(pm25_column)
@@ -801,20 +813,20 @@ def prep_summary_stats(participant_data):
         summary_statistics = calculate_summary_stats(pm25_column)
         participant_data[part_id]['summary_stats'] = summary_statistics
 
-    # Calculate summary stats for all participants combined and for each group combined.
-    for data_grouping, data_list in data_groups.items():
-        summary_statistics = calculate_summary_stats(data_list)
-        participant_data[data_grouping] = {}
-
-        # Add the summary stats and the combined data to participant_data
-        participant_data[data_grouping]['summary_stats'] = summary_statistics
-        participant_data[data_grouping]['data'] = pandas.DataFrame({'pm25': data_list})
-
-    # Add a "GroupNO" key for all entries in data_groups.
-    for key in data_groups.keys():
-        participant_data[key]["GroupNO"] = key[-1]
-        # Add color code for all entries in data_groups.
-        participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
+    # # Calculate summary stats for all participants combined and for each group combined.
+    # for data_grouping, data_list in data_groups.items():
+    #     summary_statistics = calculate_summary_stats(data_list)
+    #     participant_data[data_grouping] = {}
+    #
+    #     # Add the summary stats and the combined data to participant_data
+    #     participant_data[data_grouping]['summary_stats'] = summary_statistics
+    #     participant_data[data_grouping]['data'] = pandas.DataFrame({'pm25': data_list})
+    #
+    # # Add a "GroupNO" key for all entries in data_groups.
+    # for key in data_groups.keys():
+    #     participant_data[key]["GroupNO"] = key[-1]
+    #     # Add color code for all entries in data_groups.
+    #     participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
 
 
     return participant_data
@@ -941,7 +953,9 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
 
     # Create a nested list of 'pm25' values for all participants
     for part_id in participant_ids:
-        data_values.append(participant_data[part_id]['data']['pm25'])
+        pm25_list = participant_data[part_id]['data']['pm25'].dropna().tolist()
+        data_values.append(pm25_list)
+
 
     # Create a box and whisker plot with all participants
     bp = plt.boxplot(data_values, patch_artist=True, showfliers=False)
