@@ -684,10 +684,8 @@ def pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict,
         # Convert time column from ISO8601 to datetime objects
         data_df['time'] = pandas.to_datetime(data_df['time'], unit='s')
 
-        # Drop nan values from the pm25 column and convert to numeric.
-        data_df['pm25'] = data_df["pm25"].dropna()
+        # Convert data column to numeric.
         data_df['pm25'] = pd.to_numeric(data_df['pm25'], errors='coerce')  # Convert 'PM2.5' column to numeric
-
 
         # Reorder the columns so that 'time' is the first column
         data_df = data_df.reindex(columns=['time'] + list(data_df.columns.drop('time')))
@@ -796,6 +794,7 @@ def prep_summary_stats(participant_data):
             raise KeyError("'pm25' column not found in the DataFrame.")
         else:
             pm25_column = data["pm25"]
+            pm25_column=  pm25_column.dropna()  # Drop any non numeric values
 
         # Add the data to the overall data list and to its respective group list.
         data_groups['overall'].extend(pm25_column)
@@ -942,17 +941,30 @@ def save_graph(graph_location, file_name):
 
     return
 
-def plot_summaries(participant_data, graph_location):
+def plot_summaries(participant_data, legend_elements, graph_location):
     """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
     includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
-    by group assignment."""
+    by group assignment.
+    Args:
+        participant_data (dict) : nested dictionary with participant IDs as keys and all data as values.
+        legend_elements (list) : defines color coding for legend.
+        graph_location (str) : pathway to where graphs are saved.
+    """
+
     participant_ids = list(participant_data.keys())
 
     # Define the pastel color palette
     colors = sns.color_palette('pastel')[1:5]
 
+    # Create list of summary stats to be graphed via bar. Everything but percentiles.
+    summary_stats = participant_data[list(participant_data.keys())[0]]['summary_stats'].keys()
+    stats_to_graph = []
+    for item in summary_stats:
+        if 'percentile' not in item:
+            stats_to_graph.append(item)
+
     # Create a bar chart for each summary statistic.
-    for sum_stat in ['max', 'mean', 'percentage_above_12']:
+    for sum_stat in stats_to_graph:
         plt.figure()
         plt.figure(figsize=(8, 5), dpi=150)
         plt.title(f'{sum_stat} vs participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
@@ -971,13 +983,10 @@ def plot_summaries(participant_data, graph_location):
         # Create the bar plot with assigned colors
         plt.bar(participant_ids, stat_values, color=bar_colors)
 
-    # Create legend with group colors
-    legend_elements = [plt.bar(0, 0, color=color, label=label) for label, color in
-                         zip(['Group A', 'Group B', 'Group C'], colors)]
-
     plt.legend(handles=legend_elements)
+
     # Show the plot
-    # plt.show()
+    plt.show()
 
     # # Save the plot to the specified directory
     # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
