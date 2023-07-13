@@ -275,7 +275,7 @@ def main():
         # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
         # 'summary_stats'.
         participant_data, data_groups = prep_summary_stats(participant_data, environ_var)
-    print(participant_data)
+        print(participant_data)
 
         # # Create 3 lists, containing all participant IDs for participants of each educational group.
         # educational_groups = group_lists(participant_data)
@@ -743,8 +743,6 @@ def prep_summary_stats(participant_data, environ_var):
     'group_C': []
     }
 
-    print(participant_data)
-
     for part_id in participant_data.keys():
         data = participant_data[part_id]["data"]
 
@@ -796,8 +794,6 @@ def prep_summary_stats(participant_data, environ_var):
         participant_data[key]["GroupNO"] = key[-1]
         # Add color code for all entries in data_groups.
         participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
-
-    print("\nafter prep_summary_stats:", participant_data)
 
     return participant_data, data_groups
 
