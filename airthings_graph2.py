@@ -262,6 +262,9 @@ def main():
 
     }
 
+    # Create and add the overall entries to participant_data
+    participant_data = add_overall_entries(participant_data)
+
     # Location to save graphs.
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
@@ -274,7 +277,7 @@ def main():
         # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
         # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
         # 'summary_stats'.
-        participant_data, data_groups = prep_summary_stats(participant_data, environ_var)
+        participant_data, data_groups = prep_summary_stats(participant_data, environ_var, environ_var_list)
         print(participant_data)
 
         # # Create 3 lists, containing all participant IDs for participants of each educational group.
@@ -715,14 +718,20 @@ def assign_color(participant_data, part_id, GroupNO):
 
     return participant_data
 
-def prep_summary_stats(participant_data, environ_var):
+def add_overall_entries(participant_data):
+
+
+
+def prep_summary_stats(participant_data, environ_var, environ_var_list):
     """ Preps for summary statistic (percentiles, max, mean, % above 12) calculations for environ_var. Calculations for
-    each participant, all participants combined, and all participants of each group (A, B, C) combined.
+    each participant individually, all participants combined, and all participants of each group (A, B, C) combined.
 
     Args:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
         group_assignment.
         environ_var (str) : the name of the environmental variable that we are currently looking at/calculating stats for.
+        environ_var_list (list) : list of all the environmental variables that we are looking at. Used to populate the
+        overall entry 'data' dataframe columns.
 
     Returns:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
@@ -735,13 +744,6 @@ def prep_summary_stats(participant_data, environ_var):
         DataFrame.
     """
 
-    # initialize a dict of lists to combine data from all participants, and from all participants of each group.
-    data_groups = {
-    'overall': [],
-    'group_A': [],
-    'group_B': [],
-    'group_C': []
-    }
 
     for part_id in participant_data.keys():
         data = participant_data[part_id]["data"]
@@ -773,10 +775,18 @@ def prep_summary_stats(participant_data, environ_var):
 
         # Create yet another nested dictionary to hold all the summary stats. The key is 'summary_stats' and contains
         # environmental variables as nested keys. If the participant doesn't have a summary_stats key yet, create it.
-        # Otherwise, simply add a new environ_var key within summary_stats.
+        # Otherwise, simply add the summary_stats to the corresponding key.
         if 'summary_stats' not in participant_data[part_id]:
-            participant_data[part_id]['summary_stats'] = {}
+            participant_data[part_id]['summary_stats'] = pd.DataFrame(columns=environ_var_list)
         participant_data[part_id]['summary_stats'][environ_var] = summary_statistics
+
+    # Create and populate overall entries.
+    participant_data = create_overall_entries(data_groups, environ_var, participant_data, part_id)
+
+    return participant_data, data_groups
+
+def create_overall_entries(data_groups, environ_var, participant_data, part_id):
+    """Creates and populates overall entries: 'overall', group_A, group_B, group_C."""
 
     # Calculate summary stats for all participants combined and for each group combined.
     for data_grouping, data_list in data_groups.items():
@@ -785,9 +795,12 @@ def prep_summary_stats(participant_data, environ_var):
 
         # Add the summary stats and the combined data to participant_data
         participant_data[part_id]['summary_stats'][environ_var] = summary_statistics
-        # print(part_id, 'data:', data)
-        participant_data[data_grouping]['data'] = pandas.DataFrame({environ_var: data_list})
-        # print('post line 784', 'data:', data)
+
+        # If the entry does not have a 'data' key (first time through for the overall entries), create one with the
+        # value being a dataframe with the environmental variables as columns.
+        if 'data' not in participant_data[data_grouping].keys():
+            participant_data[data_grouping]['data'] = pandas.DataFrame(columns=[])
+        participant_data[data_grouping]['data'][environ_var] = pandas.DataFrame({environ_var: data_list})
 
     # Add a "GroupNO" key for all entries in data_groups.
     for key in data_groups.keys():
@@ -795,7 +808,7 @@ def prep_summary_stats(participant_data, environ_var):
         # Add color code for all entries in data_groups.
         participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
 
-    return participant_data, data_groups
+    return participant_data
 
 def calculate_summary_stats(environ_var_column, environ_var):
     """ Calculate the summary statistics for a given set of environ_var values and return them in a dictionary.
