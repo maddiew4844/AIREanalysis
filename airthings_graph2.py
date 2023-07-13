@@ -325,8 +325,8 @@ def main():
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
     # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), graph_location)
-    plot_summaries(participant_data, legend_elements, graph_location)
-    # plot_box_whisker(participant_data, legend_elements, graph_location)
+    # plot_summaries(participant_data, legend_elements, graph_location)
+    plot_box_whisker(participant_data, legend_elements, graph_location)
 
     return
 
@@ -846,9 +846,9 @@ def calculate_summary_stats(pm25_column):
         "50th_percentile": np.percentile(pm25_column, 50),
         "75th_percentile": np.percentile(pm25_column, 75),
         "90th_percentile": np.percentile(pm25_column, 90),
-        "max": np.max(pm25_column),
-        "mean": np.mean(pm25_column),
-        "percentage_above_12": (sum(value > 12 for value in pm25_column) / len(pm25_column)) * 100
+        "Maximum": np.max(pm25_column),
+        "Mean": np.mean(pm25_column),
+        "Pecentage above 12": (sum(value > 12 for value in pm25_column) / len(pm25_column)) * 100
     }
 
     return summary_statistics
@@ -967,7 +967,7 @@ def plot_summaries(participant_data, legend_elements, graph_location):
     for sum_stat in stats_to_graph:
         plt.figure()
         plt.figure(figsize=(8, 5), dpi=150)
-        plt.title(f'{sum_stat} vs participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
+        plt.title(f'{sum_stat} vs Participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
         plt.xlabel('Participant')
         plt.ylabel(sum_stat)
 
@@ -1012,6 +1012,10 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
     # Create a box and whisker plot with all participants
     bp = plt.boxplot(data_values, patch_artist=True, showfliers=False)
 
+    # Set the x-axis tick labels as participant IDs
+    plt.xticks(range(1, len(participant_ids) + 1), participant_ids)
+    plt.xticks(rotation=45)
+
     # Set the facecolor of each box based on participant's color.
     for i, box in enumerate(bp['boxes']):
         box.set_facecolor(participant_data[participant_ids[i]]['color'])
@@ -1026,10 +1030,6 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
     plt.title('Box and Whisker Plot')
     plt.legend(handles=legend_elements)
     plt.figure(figsize=(8, 5), dpi=150)
-
-    # Set the x-axis tick labels as participant IDs
-    plt.xticks(range(1, len(participant_ids) + 1), participant_ids)
-    plt.xticks(rotation=45)
 
     # Show the plot
     plt.show()
