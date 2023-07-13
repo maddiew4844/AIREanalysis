@@ -750,12 +750,12 @@ def prep_summary_stats(participant_data, environ_var):
         if not isinstance(data, pd.DataFrame):
             raise KeyError("'data' key must contain a DataFrame.")
 
-        # # Check if environ_var column exists in the DataFrame
-        # if environ_var not in data.columns:
-        #     raise KeyError(f"{environ_var} column not found in the DataFrame.")
-        # else:
-        environ_var_column = data[environ_var]
-        environ_var_column = environ_var_column.dropna()  # Drop any non numeric values
+        # Check if environ_var column exists in the DataFrame
+        if environ_var not in data.columns:
+            raise KeyError(f"{environ_var} column not found in the DataFrame.")
+        else:
+            environ_var_column = data[environ_var]
+            environ_var_column = environ_var_column.dropna()  # Drop any non numeric values
 
         # Add the data to the overall data list and to its respective group list.
         data_groups['overall'].extend(environ_var_column)
