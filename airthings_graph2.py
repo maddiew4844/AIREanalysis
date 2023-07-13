@@ -324,8 +324,8 @@ def main():
     # Location to save graphs.
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
-    graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), graph_location)
-    # plot_summaries(participant_data, legend_elements, graph_location)
+    # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), graph_location)
+    plot_summaries(participant_data, legend_elements, graph_location)
     # plot_box_whisker(participant_data, legend_elements, graph_location)
 
     return
@@ -1000,7 +1000,6 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
         pm25_list = participant_data[part_id]['data']['pm25'].dropna().tolist()
         data_values.append(pm25_list)
 
-
     # Create a box and whisker plot with all participants
     bp = plt.boxplot(data_values, patch_artist=True, showfliers=False)
 
@@ -1017,6 +1016,7 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
     plt.ylabel('PM2.5')
     plt.title('Box and Whisker Plot')
     plt.legend(handles=legend_elements)
+    plt.figure(figsize=(8, 5), dpi=150)
 
     # Set the x-axis tick labels as participant IDs
     plt.xticks(range(1, len(participant_ids) + 1), participant_ids)
