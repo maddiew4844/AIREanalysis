@@ -262,9 +262,6 @@ def main():
 
     }
 
-    # Create and add the overall entries to participant_data
-    participant_data = add_overall_entries(participant_data)
-
     # Location to save graphs.
     graph_location = "/Users/maddiewallace/PycharmProjects/AIREanalysis/graph_outputs"
 
@@ -684,8 +681,25 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
         'data': data_df,
     }
 
+    # Create and add the overall entries to participant_data. These entries are empty for now.
+    participant_data = add_overall_entries(participant_data)
+
     # Assign a color based on the GroupNO.
     participant_data = assign_color(participant_data, part_id, GroupNO)
+
+    return participant_data
+
+def add_overall_entries(participant_data):
+    """Add 4 entries to participant_data to contain the overall data. Create empty data structure to be filled later on."""
+
+    participant_data['overall'] = {'data':
+                    pandas.DataFrame(columns=['co2', 'humidity', 'light', 'pressure', 'sla', 'temp', 'voc', 'pm25']),
+                    'GroupNO': '',
+                    'color': ()}
+
+    participant_data['group_a'] = participant_data['overall'].copy()
+    participant_data['group_b'] = participant_data['overall'].copy()
+    participant_data['group_c'] = participant_data['overall'].copy()
 
     return participant_data
 
@@ -717,10 +731,6 @@ def assign_color(participant_data, part_id, GroupNO):
     participant_data[part_id]['color'] = color
 
     return participant_data
-
-def add_overall_entries(participant_data):
-
-
 
 def prep_summary_stats(participant_data, environ_var, environ_var_list):
     """ Preps for summary statistic (percentiles, max, mean, % above 12) calculations for environ_var. Calculations for
