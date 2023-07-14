@@ -269,13 +269,30 @@ def main():
     # Choices: 'co2', 'humidity', 'light', 'pressure', 'sla', 'temp', 'voc', or 'pm25'
     environ_var_list = ['pm25', 'co2']
 
+    # Names of keys to store overall data
+    overall_key_list = ['overall', 'group_A', 'group_B', 'group_C']
+
+    overall_data_dict = {}
+
     # Calculate the summary statistics and create graphs for the desired environmental variables.
     for environ_var in environ_var_list:
-        # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, for all
-        # participants combined, and for each group (A, B, C) combined. Add them to participant_data under the key
-        # 'summary_stats'.
-        participant_data, data_groups = prep_summary_stats(participant_data, environ_var, environ_var_list)
-        print(participant_data)
+        # Calculate pm25 summary stats (percentiles, max, mean, % above 12) for each participant individually, add them
+        # to participant_data under the key 'summary_stats'. While we're here, add the data to their respective overall
+        # data columns.
+        participant_data, overall_data = prep_summary_stats(participant_data, environ_var, environ_var_list, overall_key_list)
+        overall_data_dict[environ_var] = overall_data
+
+    # Create and add the overall entries to participant_data. These entries are empty for now.
+    participant_data = add_overall_entries(participant_data, overall_data_dict, environ_var_list, overall_key_list)
+
+    exit()
+
+
+    # Assign a color based on the GroupNO.
+    for part_id in participant_data.keys():
+        participant_data = assign_color(participant_data, part_id)
+
+    #print(participant_data)
 
         # # Create 3 lists, containing all participant IDs for participants of each educational group.
         # educational_groups = group_lists(participant_data)
@@ -681,35 +698,51 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
         'data': data_df,
     }
 
-    # Create and add the overall entries to participant_data. These entries are empty for now.
-    participant_data = add_overall_entries(participant_data)
+    return participant_data
 
-    # Assign a color based on the GroupNO.
-    participant_data = assign_color(participant_data, part_id, GroupNO)
+
+def add_overall_entries(participant_data, overall_data_dict, environ_var_list, overall_key_list):
+    """Add 4 combined data entries to participant_data and fill the 'data' structure with overall data.
+
+    Parameters:
+        participant_data (dict): The participant data dictionary.
+        overall_data_dict (dict): Dictionary containing the data for overall, group_a, group_b, group_c for all
+        requested variables. Created via prep_summary function
+        environ_var_list (list): List of environmental variables (column names).
+        overall_key_list (list) : names of the overall group keys
+
+    Returns:
+        participant_data (dict) : participant data dictionary updated with 4 overall entries
+    """
+
+    # Create an empty structure to copy.
+    empty_structure = {
+        'data': {},
+        'GroupNO': 'D',
+        'color': ()
+    }
+    # Cycle through each overall category, creating an entry in participant data,
+    for overall_key in overall_key_list:
+        participant_data[overall_key] = empty_structure.copy()
+
+        # Add complied data of the desired environ variables.
+        for environ_var in overall_data_dict.keys():
+            for overall_group in overall_data_dict[environ_var].keys():
+
+                # if the keys from the two dictionaries are the same, ie 'overall', add the data to the participant_data.
+                if overall_group == overall_key:
+                    participant_data[overall_key]['data'][environ_var] = overall_data_dict[environ_var][overall_group]
+
+    print(participant_data)
 
     return participant_data
 
-def add_overall_entries(participant_data):
-    """Add 4 entries to participant_data to contain the overall data. Create empty data structure to be filled later on."""
-
-    participant_data['overall'] = {'data':
-                    pandas.DataFrame(columns=['co2', 'humidity', 'light', 'pressure', 'sla', 'temp', 'voc', 'pm25']),
-                    'GroupNO': '',
-                    'color': ()}
-
-    participant_data['group_a'] = participant_data['overall'].copy()
-    participant_data['group_b'] = participant_data['overall'].copy()
-    participant_data['group_c'] = participant_data['overall'].copy()
-
-    return participant_data
-
-def assign_color(participant_data, part_id, GroupNO):
+def assign_color(participant_data, part_id):
     """Adds a color code based on the GroupNO of the participant.
     Args:
         participant_data (dict) : nested dictionary containing participant IDs as keys, their date_dict, and
         group_assignment.
         part_id (str) : participant ID
-        GroupNO (str) : educational group assignment of the given participant (A, B, or C).
 
     Returns:
         participant_data (dict) : nested dictionary containing participant IDs as keys, their date_dict, and
@@ -718,6 +751,8 @@ def assign_color(participant_data, part_id, GroupNO):
 
     # Define the pastel color palette
     colors = sns.color_palette('pastel')[1:5]
+    GroupNO = participant_data[part_id]['GroupNO']
+
     # Assign colors based on 'GroupNO' value
     if GroupNO == 'A':
         color = colors[0]
@@ -732,9 +767,9 @@ def assign_color(participant_data, part_id, GroupNO):
 
     return participant_data
 
-def prep_summary_stats(participant_data, environ_var, environ_var_list):
-    """ Preps for summary statistic (percentiles, max, mean, % above 12) calculations for environ_var. Calculations for
-    each participant individually, all participants combined, and all participants of each group (A, B, C) combined.
+def prep_summary_stats(participant_data, environ_var, environ_var_list, overall_key_list):
+    """ Preps for summary statistic (percentiles, max, mean, % above 12) calculations for environ_var. simultaneously
+    concatonates all the overall data for all participants of each group (A, B, C).
 
     Args:
         participant_data (dict) : nested dictionary updated to contain participant IDs as keys, their date_dict, and
@@ -754,6 +789,10 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
         DataFrame.
     """
 
+    # initialize a dict of lists to combine data from all participants, and from all participants of each group.
+    overall_data = {}
+    for key in overall_key_list:
+        overall_data[key] = []
 
     for part_id in participant_data.keys():
         data = participant_data[part_id]["data"]
@@ -767,33 +806,47 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
             raise KeyError(f"{environ_var} column not found in the DataFrame.")
         else:
             environ_var_column = data[environ_var]
-            environ_var_column = environ_var_column.dropna()  # Drop any non numeric values
+            environ_var_column = environ_var_column.dropna().tolist()  # Drop any non numeric values
 
-        # Add the data to the overall data list and to its respective group list.
-        data_groups['overall'].extend(environ_var_column)
-        group = participant_data[part_id]["GroupNO"]
 
-        if group == 'A':
-            data_groups['group_A'].extend(environ_var_column)
-        elif group == 'B':
-            data_groups['group_B'].extend(environ_var_column)
-        elif group == 'C':
-            data_groups['group_C'].extend(environ_var_column)
+        GroupNO = participant_data[part_id]["GroupNO"]
 
-        # Calculate summary stats for current individual participant.
-        summary_statistics = calculate_summary_stats(environ_var_column, environ_var)
+        # Fill the overall data lists.
+        overall_data = extend_data_list(overall_data, overall_key_list, environ_var_column, 0)
 
-        # Create yet another nested dictionary to hold all the summary stats. The key is 'summary_stats' and contains
-        # environmental variables as nested keys. If the participant doesn't have a summary_stats key yet, create it.
-        # Otherwise, simply add the summary_stats to the corresponding key.
-        if 'summary_stats' not in participant_data[part_id]:
-            participant_data[part_id]['summary_stats'] = pd.DataFrame(columns=environ_var_list)
-        participant_data[part_id]['summary_stats'][environ_var] = summary_statistics
+        # Fill the individual group lists
+        if GroupNO == 'A':
+            overall_data = extend_data_list(overall_data, overall_key_list, environ_var_column, 1)
+        elif GroupNO == 'B':
+            overall_data = extend_data_list(overall_data, overall_key_list, environ_var_column, 2)
+        elif GroupNO == 'C':
+            overall_data = extend_data_list(overall_data, overall_key_list, environ_var_column, 3)
+    #
+    #     # Calculate summary stats for current individual participant.
+    #     summary_statistics = calculate_summary_stats(environ_var_column, environ_var)
+    #
+    #     # Create yet another nested dictionary to hold all the summary stats. The key is 'summary_stats' and contains
+    #     # environmental variables as nested keys. If the participant doesn't have a summary_stats key yet, create it.
+    #     # Otherwise, simply add the summary_stats to the corresponding key.
+    #     if 'summary_stats' not in participant_data[part_id]:
+    #         participant_data[part_id]['summary_stats'] = pd.DataFrame(columns=environ_var_list)
+    #     participant_data[part_id]['summary_stats'][environ_var] = summary_statistics
+    #
+    return participant_data, overall_data
 
-    # Create and populate overall entries.
-    participant_data = create_overall_entries(data_groups, environ_var, participant_data, part_id)
+def extend_data_list(overall_data, overall_key_list, environ_var_column, key):
+    """Adds the new participant's data to the overall data list for the current environ variable.
+    Args:
+        overall_data (dict) : containing the complied data for overall, group_a, group_b, group_c.
+        overall_key_list (list) : list of keys for ^ dict
+        environ_var_column (list) : the new data to be added to overall_data.
+        key (int): the list position of the group in overall_key_list = ['overall', 'group_A', 'group_A', 'group_C'].
+    """
 
-    return participant_data, data_groups
+    data_list = overall_data[overall_key_list[key]]
+    data_list.extend(environ_var_column)
+    overall_data[overall_key_list[key]] = data_list
+    return overall_data
 
 def create_overall_entries(data_groups, environ_var, participant_data, part_id):
     """Creates and populates overall entries: 'overall', group_A, group_B, group_C."""
