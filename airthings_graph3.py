@@ -821,12 +821,12 @@ def calculate_summary_stats(environ_var_column, environ_var):
         "90th_percentile": np.percentile(environ_var_column, 90),
         "Maximum": np.max(environ_var_column),
         "Mean": np.mean(environ_var_column),
+        "Percent above 12": 0
     }
 
     # If we are dealing with pm25, calculate the percentage of time above the threshold of 12.
-    print(environ_var)
-    if environ_var == "pm25":
-        summary_statistics[environ_var]["Pecentage above 12"] = (sum(value > 12 for value in environ_var_column) / len(environ_var_column)) * 100
+    if environ_var == 'pm25':
+        summary_statistics['Percent above 12'] = sum(value > 12 for value in environ_var_column) / len(environ_var_column) * 100
 
     return summary_statistics
 
@@ -935,11 +935,16 @@ def plot_summaries(participant_data, legend_elements, environ_var, colors, graph
     # Create list of summary stats to be graphed via bar. Everything but percentiles.
     summary_stats = participant_data[list(participant_data.keys())[0]]['summary_stats'][environ_var].keys()
     stats_to_graph = []
+    print("before", environ_var, summary_stats)
     for item in summary_stats:
         if 'percentile' not in item:
             stats_to_graph.append(item)
 
-    print(environ_var, stats_to_graph)
+    # Do no include percent above 12 unless this is pm25
+    if environ_var != 'pm25':
+        stats_to_graph.remove("Percent above 12")
+
+    print("after", environ_var, stats_to_graph)
 
     # # Create a bar chart for each summary statistic.
     # for sum_stat in stats_to_graph:
