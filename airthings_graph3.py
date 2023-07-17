@@ -103,7 +103,7 @@ def main():
 
     # List of all the environmental variables that we wish to examine.
     # Choices: 'co2', 'humidity', 'light', 'pressure', 'sla', 'temp', 'voc', 'pm1', or 'pm25'
-    environ_var_list = ['pm25', 'voc']
+    environ_var_list = ['temp']
 
     # Calculate the summary statistics and create graphs for the desired environmental variables.
     for environ_var in environ_var_list:
@@ -112,9 +112,9 @@ def main():
         # 'summary_stats'.
         participant_data, data_groups = prep_summary_stats(participant_data, environ_var, environ_var_list)
 
-        # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
-        # plot_summaries(participant_data, legend_elements, environ_var, graph_location)
-        plot_box_whisker(participant_data, legend_elements, environ_var, graph_location)
+        graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
+        plot_summaries(participant_data, legend_elements, environ_var, graph_location)
+        # plot_box_whisker(participant_data, legend_elements, environ_var, graph_location)
 
     # print(participant_data)
 
@@ -857,8 +857,8 @@ def plot_box_whisker(participant_data, legend_elements, environ_var, graph_locat
 
     plt.show()
 
-    # Save the plot to the specified directory
-    save_graph(graph_location, title.replace(' ', '_'))
+    # # Save the plot to the specified directory
+    # save_graph(graph_location, title.replace(' ', '_'))
 
     return
 
