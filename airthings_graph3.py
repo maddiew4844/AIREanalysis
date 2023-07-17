@@ -276,7 +276,7 @@ def main():
         # plot_summaries(participant_data, legend_elements, graph_location)
         # plot_box_whisker(participant_data, legend_elements, graph_location)
 
-    #print(participant_data)
+    print(participant_data)
 
     return
 
@@ -785,14 +785,12 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
         # If the overall category has not been initialized in participant_data yet, initialize it.
         if data_grouping not in participant_data.keys():
             participant_data[data_grouping] = {}
-
-        # Initialize a summary stats key.
-        if 'summary_stats' not in participant_data[data_grouping]:
             participant_data[data_grouping]['summary_stats'] = pd.DataFrame(columns=environ_var_list)
+            participant_data[data_grouping]['data'] = pd.DataFrame(columns=environ_var_list)
 
         # Add the summary stats for the combined data to participant_data
         participant_data[data_grouping]['summary_stats'][environ_var] = summary_statistics
-        participant_data[data_grouping]['data'] = pandas.DataFrame({environ_var: data_list})
+        participant_data[data_grouping]['data'][environ_var] = data_list
 
     # Add a "GroupNO" key for all entries in data_groups.
     for key in data_groups.keys():
@@ -800,7 +798,6 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
         #participant_data[key]["GroupNO"] = key[-1]
         # Add color code for all entries in data_groups.
         participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
-    #
 
     return participant_data, data_groups
 
