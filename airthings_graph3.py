@@ -273,10 +273,10 @@ def main():
         participant_data, data_groups = prep_summary_stats(participant_data, environ_var, environ_var_list)
 
         # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
-        # plot_summaries(participant_data, legend_elements, graph_location)
+        plot_summaries(participant_data, legend_elements, environ_var, colors, graph_location)
         # plot_box_whisker(participant_data, legend_elements, graph_location)
 
-    print(participant_data)
+    # print(participant_data)
 
     return
 
@@ -824,8 +824,9 @@ def calculate_summary_stats(environ_var_column, environ_var):
     }
 
     # If we are dealing with pm25, calculate the percentage of time above the threshold of 12.
+    print(environ_var)
     if environ_var == "pm25":
-        summary_statistics["Pecentage above 12"] = (sum(value > 12 for value in environ_var_column) / len(environ_var_column)) * 100
+        summary_statistics[environ_var]["Pecentage above 12"] = (sum(value > 12 for value in environ_var_column) / len(environ_var_column)) * 100
 
     return summary_statistics
 
@@ -882,8 +883,8 @@ def graph_group_timeseries(participant_data, educational_groups, data_groups_key
     for ed_group in ['A', 'B', 'C']:
         plt.figure(figsize=(8, 5), dpi=150)
         plt.title(f'{environ_var} vs Time, Group {ed_group}', fontdict={'fontweight': 'bold', 'fontsize': 18})
-        plt.xlabel('Timestamp')
-        plt.ylabel(f'{environ_var}')
+        plt.xlabel('Timestamp', fontdict={'fontweight': 'bold', 'fontsize': 14})
+        plt.ylabel(f'{environ_var}', fontdict={'fontweight': 'bold', 'fontsize': 14})
         plt.xticks(rotation=45)
 
         # Go through all participants of the current educational group, plotting PM2.5 vs time.
@@ -918,52 +919,52 @@ def save_graph(graph_location, file_name):
 
     return
 
-def plot_summaries(participant_data, legend_elements, graph_location):
+def plot_summaries(participant_data, legend_elements, environ_var, colors, graph_location):
     """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
     includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
     by group assignment.
     Args:
         participant_data (dict) : nested dictionary with participant IDs as keys and all data as values.
         legend_elements (list) : defines color coding for legend.
+        environ_var (str) : Name of current environmental variable.
         graph_location (str) : pathway to where graphs are saved.
     """
 
     participant_ids = list(participant_data.keys())
 
-    # Define the pastel color palette
-    colors = sns.color_palette('pastel')[1:5]
-
     # Create list of summary stats to be graphed via bar. Everything but percentiles.
-    summary_stats = participant_data[list(participant_data.keys())[0]]['summary_stats'].keys()
+    summary_stats = participant_data[list(participant_data.keys())[0]]['summary_stats'][environ_var].keys()
     stats_to_graph = []
     for item in summary_stats:
         if 'percentile' not in item:
             stats_to_graph.append(item)
 
-    # Create a bar chart for each summary statistic.
-    for sum_stat in stats_to_graph:
-        plt.figure()
-        plt.figure(figsize=(8, 5), dpi=150)
-        plt.title(f'{sum_stat} vs Participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
-        plt.xlabel('Participant')
-        plt.ylabel(sum_stat)
+    print(environ_var, stats_to_graph)
 
-        # Retrieve the summary statistic values for each participant
-        stat_values = [participant_data[part_id]['summary_stats'][sum_stat] for part_id in participant_ids]
-
-        # Assign colors based on 'GroupNO' value
-        bar_colors = [colors[0] if participant_data[part_id]["GroupNO"] == 'A' else
-                    colors[1] if participant_data[part_id]["GroupNO"] == 'B' else
-                    colors[2] if participant_data[part_id]["GroupNO"] == 'C' else
-                    colors[3] for part_id in participant_ids]
-
-        # Create the bar plot with assigned colors
-        plt.bar(participant_ids, stat_values, color=bar_colors)
-
-    plt.legend(handles=legend_elements)
-
-    # Show the plot
-    plt.show()
+    # # Create a bar chart for each summary statistic.
+    # for sum_stat in stats_to_graph:
+    #     plt.figure()
+    #     plt.figure(figsize=(8, 5), dpi=150)
+    #     plt.title(f'{sum_stat} {environ_var} vs Participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
+    #     plt.xlabel('Participant')
+    #     plt.ylabel(sum_stat)
+    #
+    #     # Retrieve the summary statistic values for each participant
+    #     stat_values = [participant_data[part_id]['summary_stats'].loc[sum_stat, environ_var] for part_id in participant_ids]
+    #
+    #     # Assign colors based on 'GroupNO' value
+    #     bar_colors = [colors[0] if participant_data[part_id]["GroupNO"] == 'A' else
+    #                 colors[1] if participant_data[part_id]["GroupNO"] == 'B' else
+    #                 colors[2] if participant_data[part_id]["GroupNO"] == 'C' else
+    #                 colors[3] for part_id in participant_ids]
+    #
+    #     # Create the bar plot with assigned colors
+    #     plt.bar(participant_ids, stat_values, color=bar_colors)
+    #
+    #     plt.legend(handles=legend_elements)
+    #
+    #     # Show the plot
+    #     plt.show()
 
     # # Save the plot to the specified directory
     # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
