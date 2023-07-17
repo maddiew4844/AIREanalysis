@@ -275,7 +275,7 @@ def main():
 
         # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
         # plot_summaries(participant_data, legend_elements, environ_var, graph_location)
-        # plot_box_whisker(participant_data, legend_elements, graph_location)
+        plot_box_whisker(participant_data, legend_elements, environ_var, graph_location)
 
     # print(participant_data)
 
@@ -894,7 +894,6 @@ def graph_group_timeseries(participant_data, educational_groups, data_groups_key
         plt.title(f'{environ_var} vs Time, Group {ed_group}', fontdict={'fontweight': 'bold', 'fontsize': 18})
         plt.xlabel('Timestamp', fontdict={'fontweight': 'bold', 'fontsize': 14})
         plt.ylabel(f'{environ_var}', fontdict={'fontweight': 'bold', 'fontsize': 14})
-        plt.xticks(rotation=45)
 
         # Go through all participants of the current educational group, plotting PM2.5 vs time.
         participants = educational_groups[ed_group]
@@ -910,6 +909,7 @@ def graph_group_timeseries(participant_data, educational_groups, data_groups_key
                 plt.plot(participant_data[part_id]['data']['time'], participant_data[part_id]['data'][environ_var], color=color,
                      linestyle=line_style, marker=marker, linewidth=2, markersize=2, label=part_id)
 
+        plt.xticks(rotation=45)
         plt.legend()
         plt.show()
 
@@ -971,6 +971,7 @@ def plot_summaries(participant_data, legend_elements, environ_var, graph_locatio
         plt.bar(participant_ids, stat_values, color=colors)
 
         plt.legend(handles=legend_elements)
+        plt.xticks(rotation=45)
 
         # Show the plot
         plt.show()
@@ -988,17 +989,17 @@ def plot_box_whisker(participant_data, legend_elements, environ_var, graph_locat
         environ_var (str) : Name of current environmental variable.
         graph_location (str) : pathway to where graphs are saved.
     """
-    # Extract participant IDs and their corresponding 'pm25' values
+    # Extract participant IDs and their corresponding environ_var values
     participant_ids = list(participant_data.keys())
-    data_values = []
 
-    # Create a nested list of 'pm25' values for all participants
+    # Create a list of the values to be plotted.
+    environ_var_list = []
     for part_id in participant_ids:
-        pm25_list = participant_data[part_id]['data']['pm25'].dropna().tolist()
-        data_values.append(pm25_list)
+        new_list = participant_data[part_id]['data'][environ_var].dropna().tolist()
+        environ_var_list.append(new_list)
 
     # Create a box and whisker plot with all participants
-    bp = plt.boxplot(data_values, patch_artist=True, showfliers=False)
+    bp = plt.boxplot(environ_var_list, patch_artist=True, showfliers=False)
 
     # Set the x-axis tick labels as participant IDs
     plt.xticks(range(1, len(participant_ids) + 1), participant_ids)
@@ -1014,8 +1015,8 @@ def plot_box_whisker(participant_data, legend_elements, environ_var, graph_locat
 
     # Set labels and title
     plt.xlabel('Participant')
-    plt.ylabel('PM2.5')
-    plt.title(f'{environ_var} vs Participant Box and Whisker Plot')
+    plt.ylabel(environ_var)
+    plt.title(f'{environ_var} vs Participant, Box and Whisker Plot')
     plt.legend(handles=legend_elements)
     plt.figure(figsize=(8, 5), dpi=150)
 
