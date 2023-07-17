@@ -4,7 +4,7 @@
 
 Python script to analyze and display airthings data from the AIRE study. This script 1. Pulls airthigns data from all
 participants recorded in the Qualtrics AIRE data log, 2. calculates summary statistics for desired environmental
-variables, 3. creates creates Excel summary statistics file, and creates graphical displays of the results.
+variables, 3. creates Excel summary statistics file, and creates graphical displays of the results.
 
 This script requires that ???? be installed within the environment.
 
@@ -50,6 +50,7 @@ class ColoredFormatter(logging.Formatter):
 def main():
     """The main function 1. sets up logging, 2. downloads the data log from Qualtrics, 3. parses out the participant
     groupNO, airthings_id, and date times for each period, 4. pulls airthings data via the API 5.
+
     """
 
     logger = setup_logging()  # Set up error logger.
@@ -105,15 +106,15 @@ def main():
                     'time': pd.to_datetime(
                         ['2023-03-23 19:00:00', '2023-03-23 23:00:00', '2023-03-24 21:00:00', '2023-03-25 22:00:00',
                          '2023-03-25 23:00:00']),
-                    'co2': [753.0, 757.0, 742.0, np.nan, 750.0],
-                    'humidity': [35.0, 36.0, 37.0, 37.0, np.nan],
-                    'light': [23, 29, np.nan, 16, 13],
-                    'pressure': [np.nan, 1003.6, 1002.5, 1002.4, 1002.2],
-                    'sla': [54.0, 48.0, np.nan, 49.0, 49.0],
-                    'temp': [22.2, 22.1, 22.0, np.nan, 21.9],
-                    'voc': [49.0, 49.0, np.nan, 53.0, 59.0],
-                    'pm25': [10, 15, 8, np.nan, 22],
-                    'pm1': [30, 10, 8, np.nan, 50]
+                    'co2': [753.0, 757.0, 742.0, 600, 750.0],
+                    'humidity': [35.0, 36.0, 37.0, 37.0, 20],
+                    'light': [23, 29, 3016, 13, 20],
+                    'pressure': [1000, 1003.6, 1002.5, 1002.4, 1002.2],
+                    'sla': [54.0, 48.0, 35, 49.0, 49.0],
+                    'temp': [22.2, 22.1, 22.0, 25, 21.9],
+                    'voc': [49.0, 49.0, 60, 53.0, 59.0],
+                    'pm25': [10, 15, 8, 17, 22],
+                    'pm1': [30, 10, 8, 5, 50]
                 }),
             },
             'A002': {
@@ -131,7 +132,7 @@ def main():
                     'time': pd.to_datetime(
                         ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
                          '2023-03-24 19:00:00']),
-                    'co2': [802.0, 789.0, 772.0, 942.0, 965.0],
+                    'co2': [800, 789.0, 1000, 942.0, 965.0],
                     'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
                     'light': [39, 35, 28, 14, 31],
                     'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
@@ -139,7 +140,7 @@ def main():
                     'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
                     'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
                     'pm25': [12, 9, 18, 6, 20],
-                    'pm1': [90, 10, 20, np.nan, 80]
+                    'pm1': [90, 10, 20, 30, 80]
                 }),
             },
             'A003': {
@@ -165,7 +166,7 @@ def main():
                     'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
                     'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
                     'pm25': [5, 7, 6, 3, 9],
-                    'pm1': [60, 100, 8, np.nan, 25]
+                    'pm1': [60, 100, 8, 80, 25]
                 }),
             },
             'A004': {
@@ -191,7 +192,7 @@ def main():
                     'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
                     'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
                     'pm25': [5, 7, 15, 3, 12],
-                    'pm1': [30, 10, 8, np.nan, 50]
+                    'pm1': [30, 10, 8, 1, 50]
                 }),
             },
             'A005': {
@@ -217,7 +218,7 @@ def main():
                     'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
                     'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
                     'pm25': [5, 7, 6, 3, 9],
-                    'pm1': [30, 35, 90, np.nan, 80]
+                    'pm1': [30, 35, 90, 70, 80]
                 }),
             },
             'A006': {
@@ -243,7 +244,7 @@ def main():
                     'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
                     'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
                     'pm25': [10, 15, 8, 5, 22],
-                    'pm1': [70, 20, 70, np.nan, 50]
+                    'pm1': [70, 20, 70, 80, 50]
                 }),
             },
 
@@ -273,7 +274,7 @@ def main():
         participant_data, data_groups = prep_summary_stats(participant_data, environ_var, environ_var_list)
 
         # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
-        plot_summaries(participant_data, legend_elements, environ_var, colors, graph_location)
+        # plot_summaries(participant_data, legend_elements, environ_var, graph_location)
         # plot_box_whisker(participant_data, legend_elements, graph_location)
 
     # print(participant_data)
@@ -666,6 +667,8 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
         group_assignment.
     """
 
+    data_df = data_df.dropna()
+
     # Add the part_id as a key in the participant_data dict with a nested info.
     participant_data[part_id] = {
         'date_dict': date_dict,
@@ -674,12 +677,9 @@ def fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthin
         'data': data_df,
     }
 
-    # Assign a color based on the GroupNO.
-    participant_data = assign_color(participant_data, part_id, GroupNO)
-
     return participant_data
 
-def assign_color(participant_data, part_id, GroupNO):
+def assign_color(participant_data, part_id):
     """Adds a color code based on the GroupNO of the participant.
     Args:
         participant_data (dict) : nested dictionary containing participant IDs as keys, their date_dict, and
@@ -694,6 +694,9 @@ def assign_color(participant_data, part_id, GroupNO):
 
     # Define the pastel color palette
     colors = sns.color_palette('pastel')[1:5]
+
+    GroupNO = participant_data[part_id]['GroupNO']
+
     # Assign colors based on 'GroupNO' value
     if GroupNO == 'A':
         color = colors[0]
@@ -754,11 +757,15 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
             raise KeyError(f"{environ_var} column not found in the DataFrame.")
         else:
             environ_var_column = data[environ_var]
-            environ_var_column = environ_var_column.dropna()  # Drop any non numeric values
+            # environ_var_column = environ_var_column.dropna()  # Drop any non numeric values
 
         # Add the data to the overall data list and to its respective group list.
         data_groups['overall'].extend(environ_var_column)
         group = participant_data[part_id]["GroupNO"]
+
+        # Assign each entry a color based on the GroupNO
+        if 'color' not in participant_data[part_id].keys():
+            participant_data = assign_color(participant_data, part_id)
 
         if group == 'A':
             data_groups['group_A'].extend(environ_var_column)
@@ -796,8 +803,10 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
     for key in data_groups.keys():
         participant_data[key]["GroupNO"] = 'D'
         #participant_data[key]["GroupNO"] = key[-1]
-        # Add color code for all entries in data_groups.
-        participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
+
+        # Assign each entry a color based on the GroupNO
+        if 'color' not in participant_data[key].keys():
+            participant_data = assign_color(participant_data, key)
 
     return participant_data, data_groups
 
@@ -919,7 +928,7 @@ def save_graph(graph_location, file_name):
 
     return
 
-def plot_summaries(participant_data, legend_elements, environ_var, colors, graph_location):
+def plot_summaries(participant_data, legend_elements, environ_var, graph_location):
     """Creates a bar chart of the 3 summary statistics ('max', 'mean', 'percentage_above_12'). Each of the three charts
     includes each individual participant, all participants, all Group A, all group B, and all group C. Bars are color-coded
     by group assignment.
@@ -935,7 +944,6 @@ def plot_summaries(participant_data, legend_elements, environ_var, colors, graph
     # Create list of summary stats to be graphed via bar. Everything but percentiles.
     summary_stats = participant_data[list(participant_data.keys())[0]]['summary_stats'][environ_var].keys()
     stats_to_graph = []
-    print("before", environ_var, summary_stats)
     for item in summary_stats:
         if 'percentile' not in item:
             stats_to_graph.append(item)
@@ -944,43 +952,40 @@ def plot_summaries(participant_data, legend_elements, environ_var, colors, graph
     if environ_var != 'pm25':
         stats_to_graph.remove("Percent above 12")
 
-    print("after", environ_var, stats_to_graph)
+    # Create a bar chart for each summary statistic.
+    for sum_stat in stats_to_graph:
+        plt.figure()
+        plt.figure(figsize=(8, 5), dpi=150)
+        plt.title(f'{environ_var} {sum_stat} vs Participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
+        plt.xlabel('Participant')
+        plt.ylabel(sum_stat)
 
-    # # Create a bar chart for each summary statistic.
-    # for sum_stat in stats_to_graph:
-    #     plt.figure()
-    #     plt.figure(figsize=(8, 5), dpi=150)
-    #     plt.title(f'{sum_stat} {environ_var} vs Participant', fontdict={'fontweight': 'bold', 'fontsize': 18})
-    #     plt.xlabel('Participant')
-    #     plt.ylabel(sum_stat)
-    #
-    #     # Retrieve the summary statistic values for each participant
-    #     stat_values = [participant_data[part_id]['summary_stats'].loc[sum_stat, environ_var] for part_id in participant_ids]
-    #
-    #     # Assign colors based on 'GroupNO' value
-    #     bar_colors = [colors[0] if participant_data[part_id]["GroupNO"] == 'A' else
-    #                 colors[1] if participant_data[part_id]["GroupNO"] == 'B' else
-    #                 colors[2] if participant_data[part_id]["GroupNO"] == 'C' else
-    #                 colors[3] for part_id in participant_ids]
-    #
-    #     # Create the bar plot with assigned colors
-    #     plt.bar(participant_ids, stat_values, color=bar_colors)
-    #
-    #     plt.legend(handles=legend_elements)
-    #
-    #     # Show the plot
-    #     plt.show()
+        # Retrieve the summary statistic values for each participant, create the bar plot with assigned colors
+        stat_values = []
+        for part_id in participant_ids:
+            stat_values.extend([participant_data[part_id]['summary_stats'].loc[sum_stat, environ_var]])
+
+        # Retrieve the colors for each participant
+        colors = [participant_data[part_id]['color'] for part_id in participant_ids]
+
+        plt.bar(participant_ids, stat_values, color=colors)
+
+        plt.legend(handles=legend_elements)
+
+        # Show the plot
+        plt.show()
 
     # # Save the plot to the specified directory
     # save_graph(graph_location, f"{sum_stat}_vs_participant.png")
 
     return
 
-def plot_box_whisker(participant_data, legend_elements, graph_location):
+def plot_box_whisker(participant_data, legend_elements, environ_var, graph_location):
     """Creates a box and whisker plot for the 'pm25' values of all participants.
     Args:
         participant_data (dict) : nested dictionary with participant IDs as keys and all data as values.
         legend_elements (list) : defines color coding for legend.
+        environ_var (str) : Name of current environmental variable.
         graph_location (str) : pathway to where graphs are saved.
     """
     # Extract participant IDs and their corresponding 'pm25' values
@@ -1010,7 +1015,7 @@ def plot_box_whisker(participant_data, legend_elements, graph_location):
     # Set labels and title
     plt.xlabel('Participant')
     plt.ylabel('PM2.5')
-    plt.title('Box and Whisker Plot')
+    plt.title(f'{environ_var} vs Participant Box and Whisker Plot')
     plt.legend(handles=legend_elements)
     plt.figure(figsize=(8, 5), dpi=150)
 
