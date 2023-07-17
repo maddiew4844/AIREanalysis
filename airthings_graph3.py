@@ -55,200 +55,200 @@ def main():
 
     logger = setup_logging()  # Set up error logger.
 
-    # # data_log_loc = surveyExportPrep(logger)
-    # data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
-    #
-    # # Create a list of all unique participant IDs in order.
-    # part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
-    #
-    # # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
-    # participant_data = {}
-    #
-    # # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
-    # # device ID, and airthings data.
-    # for part_id in part_id_list:
-    #
-    #     date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
-    #
-    #     # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
-    #     date_dict = convert_visit_date(date_dict, part_id)
-    #
-    #     # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
-    #     GroupNO = convert_GroupNO(GroupNO)
-    #
-    #     # Authorize and Airthings devices via API
-    #     access_token = airthings_auth()
-    #     airthings_devices = get_airthings_devices(access_token)
-    #
-    #     # Create a dictionary of all Space Pro SNs from the current device names.
-    #     SN_dict = create_SN_dict(airthings_devices)
-    #
-    #     # Pull the airthings data for the requested participant for the requested time frame.
-    #     data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
-    #
-    #     # Fill participant_data dictionary with all the info from the participant.
-    #     participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
+    # data_log_loc = surveyExportPrep(logger)
+    data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
 
-    # Set of simple sample data to use for development.
-    participant_data = {
-            'A001': {
-                'date_dict': {
-                    '1': datetime(2023, 3, 23, 14, 45),
-                    '2': datetime(2023, 4, 7, 10, 10),
-                    '3': datetime(2023, 4, 24, 16, 0),
-                    '4': datetime(2023, 7, 11, 12, 50, 10),
-                    '2B': datetime(2023, 4, 7, 10, 11),
-                    '3B': datetime(2023, 4, 24, 16, 1)
-                },
-                'GroupNO': 'A',
-                'airthings_id': 'A01',
-                'data': pandas.DataFrame({
-                    'time': pd.to_datetime(
-                        ['2023-03-23 19:00:00', '2023-03-23 23:00:00', '2023-03-24 21:00:00', '2023-03-25 22:00:00',
-                         '2023-03-25 23:00:00']),
-                    'co2': [753.0, 757.0, 742.0, 600, 750.0],
-                    'humidity': [35.0, 36.0, 37.0, 37.0, 20],
-                    'light': [23, 29, 3016, 13, 20],
-                    'pressure': [1000, 1003.6, 1002.5, 1002.4, 1002.2],
-                    'sla': [54.0, 48.0, 35, 49.0, 49.0],
-                    'temp': [22.2, 22.1, 22.0, 25, 21.9],
-                    'voc': [49.0, 49.0, 60, 53.0, 59.0],
-                    'pm25': [10, 15, 8, 17, 22],
-                    'pm1': [30, 10, 8, 5, 50]
-                }),
-            },
-            'A002': {
-                'date_dict': {
-                    '1': datetime(2023, 3, 27, 15, 0),
-                    '2': datetime(2023, 4, 14, 14, 0),
-                    '3': datetime(2023, 4, 28, 9, 0),
-                    '4': datetime(2023, 7, 11, 12, 50, 11),
-                    '2B': datetime(2023, 4, 14, 14, 1),
-                    '3B': datetime(2023, 4, 28, 9, 1)
-                },
-                'GroupNO': 'A',
-                'airthings_id': 'A02',
-                'data': pandas.DataFrame({
-                    'time': pd.to_datetime(
-                        ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
-                         '2023-03-24 19:00:00']),
-                    'co2': [800, 789.0, 1000, 942.0, 965.0],
-                    'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
-                    'light': [39, 35, 28, 14, 31],
-                    'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
-                    'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
-                    'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
-                    'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
-                    'pm25': [12, 9, 18, 6, 20],
-                    'pm1': [90, 10, 20, 30, 80]
-                }),
-            },
-            'A003': {
-                'date_dict': {
-                    '1': datetime(2023, 3, 28, 13, 0),
-                    '2': datetime(2023, 4, 10, 12, 0),
-                    '3': datetime(2023, 4, 28, 14, 0),
-                    '4': datetime(2023, 7, 11, 12, 50, 12),
-                    '2B': datetime(2023, 4, 10, 12, 1),
-                    '3B': datetime(2023, 4, 28, 14, 1)
-                },
-                'GroupNO': 'B',
-                'airthings_id': 'A03',
-                'data': pandas.DataFrame({
-                    'time': pd.to_datetime(
-                        ['2023-03-28 17:00:00', '2023-03-29 18:00:00', '2023-03-29 19:00:00', '2023-03-30 20:00:00',
-                         '2023-03-31 21:00:00']),
-                    'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
-                    'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
-                    'light': [42, 41, 44, 36, 35],
-                    'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
-                    'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
-                    'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
-                    'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
-                    'pm25': [5, 7, 6, 3, 9],
-                    'pm1': [60, 100, 8, 80, 25]
-                }),
-            },
-            'A004': {
-                'date_dict': {
-                    '1': datetime(2023, 3, 28, 13, 0),
-                    '2': datetime(2023, 4, 10, 12, 0),
-                    '3': datetime(2023, 4, 28, 14, 0),
-                    '4': datetime(2023, 7, 11, 12, 50, 12),
-                    '2B': datetime(2023, 4, 10, 12, 1),
-                    '3B': datetime(2023, 4, 28, 14, 1)
-                },
-                'GroupNO': 'C',
-                'airthings_id': 'A03',
-                'data': pandas.DataFrame({
-                    'time': pd.to_datetime(
-                        ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
-                         '2023-03-28 21:00:00']),
-                    'co2': [750.0, 730.0, 650.0, 650.0, 700.0],
-                    'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
-                    'light': [42, 41, 44, 36, 35],
-                    'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
-                    'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
-                    'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
-                    'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
-                    'pm25': [5, 7, 15, 3, 12],
-                    'pm1': [30, 10, 8, 1, 50]
-                }),
-            },
-            'A005': {
-                'date_dict': {
-                    '1': datetime(2023, 3, 28, 13, 0),
-                    '2': datetime(2023, 4, 10, 12, 0),
-                    '3': datetime(2023, 4, 28, 14, 0),
-                    '4': datetime(2023, 7, 11, 12, 50, 12),
-                    '2B': datetime(2023, 4, 10, 12, 1),
-                    '3B': datetime(2023, 4, 28, 14, 1)
-                },
-                'GroupNO': 'C',
-                'airthings_id': 'A03',
-                'data': pandas.DataFrame({
-                    'time': pd.to_datetime(
-                        ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
-                         '2023-03-28 21:00:00']),
-                    'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
-                    'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
-                    'light': [42, 41, 44, 36, 35],
-                    'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
-                    'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
-                    'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
-                    'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
-                    'pm25': [5, 7, 6, 3, 9],
-                    'pm1': [30, 35, 90, 70, 80]
-                }),
-            },
-            'A006': {
-                'date_dict': {
-                    '1': datetime(2023, 3, 23, 14, 45),
-                    '2': datetime(2023, 4, 7, 10, 10),
-                    '3': datetime(2023, 4, 24, 16, 0),
-                    '4': datetime(2023, 7, 11, 12, 50, 10),
-                    '2B': datetime(2023, 4, 7, 10, 11),
-                    '3B': datetime(2023, 4, 24, 16, 1)
-                },
-                'GroupNO': 'B',
-                'airthings_id': 'A01',
-                'data': pandas.DataFrame({
-                    'time': pd.to_datetime(
-                        ['2023-03-23 19:00:00', '2023-03-24 20:00:00', '2023-03-25 21:00:00', '2023-03-25 22:00:00',
-                         '2023-03-26 23:00:00']),
-                    'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
-                    'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
-                    'light': [23, 29, 22, 16, 13],
-                    'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
-                    'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
-                    'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
-                    'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
-                    'pm25': [10, 15, 8, 5, 22],
-                    'pm1': [70, 20, 70, 80, 50]
-                }),
-            },
+    # Create a list of all unique participant IDs in order.
+    part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
 
-        }
+    # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
+    participant_data = {}
+
+    # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
+    # device ID, and airthings data.
+    for part_id in part_id_list:
+
+        date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
+
+        # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
+        date_dict = convert_visit_date(date_dict, part_id)
+
+        # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
+        GroupNO = convert_GroupNO(GroupNO)
+
+        # Authorize and Airthings devices via API
+        access_token = airthings_auth()
+        airthings_devices = get_airthings_devices(access_token)
+
+        # Create a dictionary of all Space Pro SNs from the current device names.
+        SN_dict = create_SN_dict(airthings_devices)
+
+        # Pull the airthings data for the requested participant for the requested time frame.
+        data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
+
+        # Fill participant_data dictionary with all the info from the participant.
+        participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
+
+    # # Set of simple sample data to use for development.
+    # participant_data = {
+    #         'A001': {
+    #             'date_dict': {
+    #                 '1': datetime(2023, 3, 23, 14, 45),
+    #                 '2': datetime(2023, 4, 7, 10, 10),
+    #                 '3': datetime(2023, 4, 24, 16, 0),
+    #                 '4': datetime(2023, 7, 11, 12, 50, 10),
+    #                 '2B': datetime(2023, 4, 7, 10, 11),
+    #                 '3B': datetime(2023, 4, 24, 16, 1)
+    #             },
+    #             'GroupNO': 'A',
+    #             'airthings_id': 'A01',
+    #             'data': pandas.DataFrame({
+    #                 'time': pd.to_datetime(
+    #                     ['2023-03-23 19:00:00', '2023-03-23 23:00:00', '2023-03-24 21:00:00', '2023-03-25 22:00:00',
+    #                      '2023-03-25 23:00:00']),
+    #                 'co2': [753.0, 757.0, 742.0, 600, 750.0],
+    #                 'humidity': [35.0, 36.0, 37.0, 37.0, 20],
+    #                 'light': [23, 29, 3016, 13, 20],
+    #                 'pressure': [1000, 1003.6, 1002.5, 1002.4, 1002.2],
+    #                 'sla': [54.0, 48.0, 35, 49.0, 49.0],
+    #                 'temp': [22.2, 22.1, 22.0, 25, 21.9],
+    #                 'voc': [49.0, 49.0, 60, 53.0, 59.0],
+    #                 'pm25': [10, 15, 8, 17, 22],
+    #                 'pm1': [30, 10, 8, 5, 50]
+    #             }),
+    #         },
+    #         'A002': {
+    #             'date_dict': {
+    #                 '1': datetime(2023, 3, 27, 15, 0),
+    #                 '2': datetime(2023, 4, 14, 14, 0),
+    #                 '3': datetime(2023, 4, 28, 9, 0),
+    #                 '4': datetime(2023, 7, 11, 12, 50, 11),
+    #                 '2B': datetime(2023, 4, 14, 14, 1),
+    #                 '3B': datetime(2023, 4, 28, 9, 1)
+    #             },
+    #             'GroupNO': 'A',
+    #             'airthings_id': 'A02',
+    #             'data': pandas.DataFrame({
+    #                 'time': pd.to_datetime(
+    #                     ['2023-03-23 19:00:00', '2023-03-23 20:00:00', '2023-03-23 21:00:00', '2023-03-23 22:00:00',
+    #                      '2023-03-24 19:00:00']),
+    #                 'co2': [800, 789.0, 1000, 942.0, 965.0],
+    #                 'humidity': [30.0, 31.0, 31.0, 32.0, 35.0],
+    #                 'light': [39, 35, 28, 14, 31],
+    #                 'pressure': [1015.3, 1015.0, 1014.6, 1015.3, 1015.2],
+    #                 'sla': [44.0, 49.0, 51.0, 54.0, 43.0],
+    #                 'temp': [22.5, 22.3, 22.2, 22.1, 22.1],
+    #                 'voc': [46.0, 57.0, 48.0, 50.0, 56.0],
+    #                 'pm25': [12, 9, 18, 6, 20],
+    #                 'pm1': [90, 10, 20, 30, 80]
+    #             }),
+    #         },
+    #         'A003': {
+    #             'date_dict': {
+    #                 '1': datetime(2023, 3, 28, 13, 0),
+    #                 '2': datetime(2023, 4, 10, 12, 0),
+    #                 '3': datetime(2023, 4, 28, 14, 0),
+    #                 '4': datetime(2023, 7, 11, 12, 50, 12),
+    #                 '2B': datetime(2023, 4, 10, 12, 1),
+    #                 '3B': datetime(2023, 4, 28, 14, 1)
+    #             },
+    #             'GroupNO': 'B',
+    #             'airthings_id': 'A03',
+    #             'data': pandas.DataFrame({
+    #                 'time': pd.to_datetime(
+    #                     ['2023-03-28 17:00:00', '2023-03-29 18:00:00', '2023-03-29 19:00:00', '2023-03-30 20:00:00',
+    #                      '2023-03-31 21:00:00']),
+    #                 'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+    #                 'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #                 'light': [42, 41, 44, 36, 35],
+    #                 'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #                 'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #                 'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #                 'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #                 'pm25': [5, 7, 6, 3, 9],
+    #                 'pm1': [60, 100, 8, 80, 25]
+    #             }),
+    #         },
+    #         'A004': {
+    #             'date_dict': {
+    #                 '1': datetime(2023, 3, 28, 13, 0),
+    #                 '2': datetime(2023, 4, 10, 12, 0),
+    #                 '3': datetime(2023, 4, 28, 14, 0),
+    #                 '4': datetime(2023, 7, 11, 12, 50, 12),
+    #                 '2B': datetime(2023, 4, 10, 12, 1),
+    #                 '3B': datetime(2023, 4, 28, 14, 1)
+    #             },
+    #             'GroupNO': 'C',
+    #             'airthings_id': 'A03',
+    #             'data': pandas.DataFrame({
+    #                 'time': pd.to_datetime(
+    #                     ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+    #                      '2023-03-28 21:00:00']),
+    #                 'co2': [750.0, 730.0, 650.0, 650.0, 700.0],
+    #                 'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #                 'light': [42, 41, 44, 36, 35],
+    #                 'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #                 'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #                 'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #                 'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #                 'pm25': [5, 7, 15, 3, 12],
+    #                 'pm1': [30, 10, 8, 1, 50]
+    #             }),
+    #         },
+    #         'A005': {
+    #             'date_dict': {
+    #                 '1': datetime(2023, 3, 28, 13, 0),
+    #                 '2': datetime(2023, 4, 10, 12, 0),
+    #                 '3': datetime(2023, 4, 28, 14, 0),
+    #                 '4': datetime(2023, 7, 11, 12, 50, 12),
+    #                 '2B': datetime(2023, 4, 10, 12, 1),
+    #                 '3B': datetime(2023, 4, 28, 14, 1)
+    #             },
+    #             'GroupNO': 'C',
+    #             'airthings_id': 'A03',
+    #             'data': pandas.DataFrame({
+    #                 'time': pd.to_datetime(
+    #                     ['2023-03-28 17:00:00', '2023-03-28 18:00:00', '2023-03-28 19:00:00', '2023-03-28 20:00:00',
+    #                      '2023-03-28 21:00:00']),
+    #                 'co2': [725.0, 708.0, 654.0, 650.0, 638.0],
+    #                 'humidity': [32.0, 33.0, 34.0, 34.0, 34.0],
+    #                 'light': [42, 41, 44, 36, 35],
+    #                 'pressure': [1016.1, 1015.8, 1015.2, 1015.0, 1015.0],
+    #                 'sla': [51.0, 42.0, 41.0, 42.0, 42.0],
+    #                 'temp': [20.6, 19.5, 19.6, 19.5, 19.5],
+    #                 'voc': [46.0, 54.0, 68.0, 59.0, 55.0],
+    #                 'pm25': [5, 7, 6, 3, 9],
+    #                 'pm1': [30, 35, 90, 70, 80]
+    #             }),
+    #         },
+    #         'A006': {
+    #             'date_dict': {
+    #                 '1': datetime(2023, 3, 23, 14, 45),
+    #                 '2': datetime(2023, 4, 7, 10, 10),
+    #                 '3': datetime(2023, 4, 24, 16, 0),
+    #                 '4': datetime(2023, 7, 11, 12, 50, 10),
+    #                 '2B': datetime(2023, 4, 7, 10, 11),
+    #                 '3B': datetime(2023, 4, 24, 16, 1)
+    #             },
+    #             'GroupNO': 'B',
+    #             'airthings_id': 'A01',
+    #             'data': pandas.DataFrame({
+    #                 'time': pd.to_datetime(
+    #                     ['2023-03-23 19:00:00', '2023-03-24 20:00:00', '2023-03-25 21:00:00', '2023-03-25 22:00:00',
+    #                      '2023-03-26 23:00:00']),
+    #                 'co2': [753.0, 757.0, 742.0, 751.0, 750.0],
+    #                 'humidity': [35.0, 36.0, 37.0, 37.0, 37.0],
+    #                 'light': [23, 29, 22, 16, 13],
+    #                 'pressure': [1004.4, 1003.6, 1002.5, 1002.4, 1002.2],
+    #                 'sla': [54.0, 48.0, 48.0, 49.0, 49.0],
+    #                 'temp': [22.2, 22.1, 22.0, 22.0, 21.9],
+    #                 'voc': [49.0, 49.0, 55.0, 53.0, 59.0],
+    #                 'pm25': [10, 15, 8, 5, 22],
+    #                 'pm1': [70, 20, 70, 80, 50]
+    #             }),
+    #         },
+    #
+    #     }
 
     # Define the pastel color palette
     colors = sns.color_palette('pastel')[1:5]
@@ -273,9 +273,9 @@ def main():
         # 'summary_stats'.
         participant_data, data_groups = prep_summary_stats(participant_data, environ_var, environ_var_list)
 
-        # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
-        # plot_summaries(participant_data, legend_elements, environ_var, graph_location)
-        plot_box_whisker(participant_data, legend_elements, environ_var, graph_location)
+        graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
+        #plot_summaries(participant_data, legend_elements, environ_var, graph_location)
+        # plot_box_whisker(participant_data, legend_elements, environ_var, graph_location)
 
     # print(participant_data)
 
@@ -907,7 +907,7 @@ def graph_group_timeseries(participant_data, educational_groups, data_groups_key
             # color, line style, and marker.
             if part_id not in data_groups_keys:
                 plt.plot(participant_data[part_id]['data']['time'], participant_data[part_id]['data'][environ_var], color=color,
-                     linestyle=line_style, marker=marker, linewidth=2, markersize=2, label=part_id)
+                     linestyle=line_style, marker=marker, linewidth=1, markersize=2, label=part_id)
 
         plt.xticks(rotation=45)
         plt.legend()
@@ -1014,9 +1014,9 @@ def plot_box_whisker(participant_data, legend_elements, environ_var, graph_locat
         median.set(color='black')
 
     # Set labels and title
-    plt.xlabel('Participant')
-    plt.ylabel(environ_var)
-    plt.title(f'{environ_var} vs Participant, Box and Whisker Plot')
+    plt.xlabel('Participant', fontdict={'fontweight': 'bold', 'fontsize': 14})
+    plt.ylabel(environ_var, fontdict={'fontweight': 'bold', 'fontsize': 14})
+    plt.title(f'{environ_var} vs Participant Data Distribution', fontdict={'fontweight': 'bold', 'fontsize': 18})
     plt.legend(handles=legend_elements)
     plt.figure(figsize=(8, 5), dpi=150)
 
