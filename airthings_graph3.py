@@ -54,42 +54,42 @@ def main():
 
     logger = setup_logging()  # Set up error logger.
 
-    # data_log_loc = surveyExportPrep(logger)
-    data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
+    # # data_log_loc = surveyExportPrep(logger)
+    # data_log_loc = "/Users/maddiewallace/PycharmProjects/AIREanalysis/MyQualtricsDownload2/AIRE_data_log.csv"
+    #
+    # # Create a list of all unique participant IDs in order.
+    # part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
+    #
+    # # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
+    # participant_data = {}
+    #
+    # # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
+    # # device ID, and airthings data.
+    # for part_id in part_id_list:
+    #
+    #     date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
+    #
+    #     # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
+    #     date_dict = convert_visit_date(date_dict, part_id)
+    #
+    #     # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
+    #     GroupNO = convert_GroupNO(GroupNO)
+    #
+    #     # Authorize and Airthings devices via API
+    #     access_token = airthings_auth()
+    #     airthings_devices = get_airthings_devices(access_token)
+    #
+    #     # Create a dictionary of all Space Pro SNs from the current device names.
+    #     SN_dict = create_SN_dict(airthings_devices)
+    #
+    #     # Pull the airthings data for the requested participant for the requested time frame.
+    #     data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
+    #
+    #     # Fill participant_data dictionary with all the info from the participant.
+    #     participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
 
-    # Create a list of all unique participant IDs in order.
-    part_id_list, data_log_df, part_id_dict = create_part_id_list(data_log_loc)
-
-    # Initialize dictionary to store the participant IDs as keys, their date_dict, group_assignment, and data.
-    participant_data = {}
-
-    # Cycle through all the participants, filling the participant_data dictionary with the groupNO, date dict, airthings
-    # device ID, and airthings data.
-    for part_id in part_id_list:
-
-        date_dict, GroupNO, airthings_id = pull_group_and_dates(data_log_df, part_id_dict, part_id)
-
-        # Convert visits dates to datetime objects and adds the start date for the intervention and follow-up periods.
-        date_dict = convert_visit_date(date_dict, part_id)
-
-        # Convert the GroupNO distinctions from 1, 2, or 3 to A, B, or C
-        GroupNO = convert_GroupNO(GroupNO)
-
-        # Authorize and Airthings devices via API
-        access_token = airthings_auth()
-        airthings_devices = get_airthings_devices(access_token)
-
-        # Create a dictionary of all Space Pro SNs from the current device names.
-        SN_dict = create_SN_dict(airthings_devices)
-
-        # Pull the airthings data for the requested participant for the requested time frame.
-        data_df = pull_airthings_data(part_id, access_token, airthings_id, SN_dict, date_dict, logger)
-
-        # Fill participant_data dictionary with all the info from the participant.
-        participant_data = fill_participant_data(participant_data, part_id, date_dict, GroupNO, airthings_id, data_df)
-
-        # Set of simple sample data to use for development.
-        participant_data = {
+    # Set of simple sample data to use for development.
+    participant_data = {
             'A001': {
                 'date_dict': {
                     '1': datetime(2023, 3, 23, 14, 45),
@@ -275,7 +275,8 @@ def main():
         # graph_group_timeseries(participant_data, educational_groups, data_groups.keys(), environ_var, graph_location)
         # plot_summaries(participant_data, legend_elements, graph_location)
         # plot_box_whisker(participant_data, legend_elements, graph_location)
-        print(participant_data)
+
+    #print(participant_data)
 
     return
 
@@ -789,8 +790,8 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
         if 'summary_stats' not in participant_data[data_grouping]:
             participant_data[data_grouping]['summary_stats'] = pd.DataFrame(columns=environ_var_list)
 
-        # Add the summary stats and the combined data to participant_data
-        participant_data[data_grouping]['summary_stats'] = summary_statistics
+        # Add the summary stats for the combined data to participant_data
+        participant_data[data_grouping]['summary_stats'][environ_var] = summary_statistics
         participant_data[data_grouping]['data'] = pandas.DataFrame({environ_var: data_list})
 
     # Add a "GroupNO" key for all entries in data_groups.
@@ -799,7 +800,7 @@ def prep_summary_stats(participant_data, environ_var, environ_var_list):
         #participant_data[key]["GroupNO"] = key[-1]
         # Add color code for all entries in data_groups.
         participant_data = assign_color(participant_data, key, participant_data[key]["GroupNO"])
-
+    #
 
     return participant_data, data_groups
 
